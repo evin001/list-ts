@@ -1,2 +1,4 @@
 /.idea
 /node_modules
+/etc/firebase.json
+yarn-error.log
