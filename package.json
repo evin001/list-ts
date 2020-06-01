@@ -2,7 +2,8 @@
   "name": "list-ts",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --color --progress",
+    "build": "cross-env NODE_ENV=production webpack --color --progress"
   },
   "author": "e19a@yandex.ru",
   "license": "ISC",
@@ -50,6 +51,7 @@
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
     "style-loader": "^1.2.1",
+    "typescript": "^3.9.3",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"

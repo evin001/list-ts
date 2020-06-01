@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "esnext",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noErrorTruncation": true,
+    "isolatedModules": false,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "lib": ["es6", "dom"],
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "exclude": ["node_modules", "**/build/"],
+    "include": ["src"]
+  }
+}
