@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['./node_modules/gts', 'prettier/react', 'plugin:react/recommended'],
-  plugins: ['prettier', 'react-hooks'],
+  plugins: ['prettier', 'react-hooks', 'import'],
   globals: {
     FIREBASE: true,
   },
@@ -12,6 +12,8 @@ module.exports = {
         semi: false,
       },
     ],
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'import/order': 'error',
   },
   ignorePatterns: ['webpack.config.js'],
 }
