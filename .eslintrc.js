@@ -13,7 +13,19 @@ module.exports = {
       },
     ],
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    'import/order': 'error',
+    'import/order': [
+      'error',
+      {
+        alphabetize: { order: 'asc', caseInsensitive: true },
+        pathGroups: [
+          {
+            pattern: '~/**',
+            group: 'external',
+          },
+        ],
+      },
+    ],
+    'object-curly-spacing': ['error', 'always'],
   },
   ignorePatterns: ['webpack.config.js'],
 }

@@ -1,9 +1,8 @@
-import React from 'react'
 import { createMuiTheme } from '@material-ui/core/styles'
-import { ThemeProvider } from '@material-ui/styles'
-import { HashRouter as Router } from 'react-router-dom'
-import CssBaseline from '@material-ui/core/CssBaseline'
 import useMediaQuery from '@material-ui/core/useMediaQuery'
+import { ThemeProvider } from '@material-ui/styles'
+import React from 'react'
+import { HashRouter as Router } from 'react-router-dom'
 import AppWrapper from './AppWrapper'
 
 const AppPresenter = () => {
@@ -20,7 +19,6 @@ const AppPresenter = () => {
   return (
     <ThemeProvider theme={theme}>
       <Router>
-        <CssBaseline />
         <AppWrapper />
       </Router>
     </ThemeProvider>
