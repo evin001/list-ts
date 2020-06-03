@@ -1,6 +1,10 @@
 {
   "presets": [
-    "@babel/env",
+    ["@babel/preset-env", {
+      "modules": "commonjs",
+      "useBuiltIns": "usage",
+      "corejs": 3
+    }],
     "@babel/react",
     "@babel/typescript"
   ],
