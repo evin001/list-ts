@@ -7,12 +7,14 @@ class BookDetailsForm {
 
   #type: ListItemType
   doneDate?: Date
+  #withoutDate: boolean
 
-  constructor(listItem?: ListItem) {
+  constructor(listItem?: ListItem, withoutDate = false) {
     this.#book = new BookField(listItem?.book)
     this.#type = listItem?.type || ListItemType.Done
     this.doneDate =
       (listItem?.doneDate && new Date(listItem.doneDate)) || void 0
+    this.#withoutDate = withoutDate
   }
 
   get type() {
@@ -24,18 +26,32 @@ class BookDetailsForm {
     this.#type = value
   }
 
+  get withoutDate() {
+    return this.#withoutDate
+  }
+
+  set withoutDate(value) {
+    if (value) {
+      this.doneDate = void 0
+    }
+    this.#withoutDate = value
+  }
+
   get book(): BookField {
     return this.#book
   }
 
   clone() {
-    return new BookDetailsForm({
-      id: '',
-      doneDate: this.doneDate?.getMilliseconds(),
-      readingTarget: '',
-      type: this.#type,
-      book: this.#book.toObject(),
-    })
+    return new BookDetailsForm(
+      {
+        id: '',
+        doneDate: this.doneDate?.getMilliseconds(),
+        readingTarget: '',
+        type: this.#type,
+        book: this.#book.toObject(),
+      },
+      this.#withoutDate
+    )
   }
 }
 

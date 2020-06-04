@@ -1,7 +1,9 @@
 import { Theme } from '@material-ui/core'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
+import Checkbox from '@material-ui/core/Checkbox'
 import FormControl from '@material-ui/core/FormControl'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
@@ -85,6 +87,14 @@ const BookDetailsPage = () => {
     setDetails(nextDetails)
   }
 
+  const handleChangeWithoutDate = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const nextDetails = details.clone()
+    nextDetails.withoutDate = event.target.checked
+    setDetails(nextDetails)
+  }
+
   return (
     <div>
       <Box>
@@ -132,18 +142,33 @@ const BookDetailsPage = () => {
         <TextField type="file" label="Обложка" fullWidth margin="normal" />
       </Box>
       {details.type === ListItemType.Done && (
-        <Box className={classes.datePickerBox}>
-          <MuiPickersUtilsProvider utils={RuLocalizedUtils} locale={ruLocale}>
-            <DatePicker
-              value={details.doneDate}
-              onChange={handleChangeDate}
-              format="d MMM yyyy"
-              cancelLabel="отмена"
-              margin="normal"
-              disableFuture
+        <React.Fragment>
+          <Box className={classes.datePickerBox}>
+            <MuiPickersUtilsProvider utils={RuLocalizedUtils} locale={ruLocale}>
+              <DatePicker
+                value={details.doneDate}
+                onChange={handleChangeDate}
+                disabled={details.withoutDate}
+                format="d MMM yyyy"
+                cancelLabel="отмена"
+                margin="normal"
+                disableFuture
+              />
+            </MuiPickersUtilsProvider>
+          </Box>
+          <Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={details.withoutDate}
+                  onChange={handleChangeWithoutDate}
+                />
+              }
+              label="Не помню дату"
             />
-          </MuiPickersUtilsProvider>
-        </Box>
+          </Box>
+        </React.Fragment>
       )}
       <Box>
         <FormControl fullWidth margin="normal">
