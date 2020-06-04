@@ -15,8 +15,11 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
+import { ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
+import BookDetailsForm, { BookType } from './BookDetailsForm'
 import { fetchBook } from './bookDetailsSlice'
+import { listItemTypes } from './constants'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -48,17 +51,7 @@ const BookDetailsPage = () => {
     shallowEqual
   )
 
-  const [name, setName] = useState<string>('')
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value)
-  }
-
-  const [description, setDescription] = useState<string>('')
-  const handleChangeDescription = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setDescription(event.target.value)
-  }
+  const [details, setDetails] = useState<BookDetailsForm>(new BookDetailsForm())
 
   useDidMount(() => {
     if (id) {
@@ -68,10 +61,29 @@ const BookDetailsPage = () => {
 
   useEffect(() => {
     if (listItem) {
-      setName(listItem.book.name)
-      setDescription(listItem.book.description)
+      setDetails(new BookDetailsForm(listItem))
     }
   }, [listItem])
+
+  const handleChangeBook = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextDetails = details.clone()
+    nextDetails.book[event.target.id as BookType] = event.target.value
+    setDetails(nextDetails)
+  }
+
+  const handleChangeType = (
+    event: React.ChangeEvent<{ name?: string; value: unknown }>
+  ) => {
+    const nextDetails = details.clone()
+    nextDetails.type = event.target.value as ListItemType
+    setDetails(nextDetails)
+  }
+
+  const handleChangeDate = (date: Date | null) => {
+    const nextDetails = details.clone()
+    nextDetails.doneDate = date ?? void 0
+    setDetails(nextDetails)
+  }
 
   return (
     <div>
@@ -90,49 +102,58 @@ const BookDetailsPage = () => {
       </Box>
       <Box>
         <TextField
+          id="name"
           label="Название"
           required
           fullWidth
           margin="normal"
-          value={name}
-          onChange={handleChange}
+          value={details.book.name}
+          error={details.book.errorName}
+          helperText={details.book.helperTextName}
+          onChange={handleChangeBook}
         />
       </Box>
       <Box>
         <TextField
+          id="description"
           label="Описание"
           required
           fullWidth
           multiline
           rowsMax={10}
           margin="normal"
-          value={description}
-          onChange={handleChangeDescription}
+          value={details.book.description}
+          error={details.book.errorDescription}
+          helperText={details.book.helpTextDescription}
+          onChange={handleChangeBook}
         />
       </Box>
       <Box>
         <TextField type="file" label="Обложка" fullWidth margin="normal" />
       </Box>
-      <Box className={classes.datePickerBox}>
-        <MuiPickersUtilsProvider utils={RuLocalizedUtils} locale={ruLocale}>
-          <DatePicker
-            value={new Date()}
-            onChange={() => {}}
-            format="d MMM yyyy"
-            cancelLabel="отмена"
-            margin="normal"
-          />
-        </MuiPickersUtilsProvider>
-      </Box>
+      {details.type === ListItemType.Done && (
+        <Box className={classes.datePickerBox}>
+          <MuiPickersUtilsProvider utils={RuLocalizedUtils} locale={ruLocale}>
+            <DatePicker
+              value={details.doneDate}
+              onChange={handleChangeDate}
+              format="d MMM yyyy"
+              cancelLabel="отмена"
+              margin="normal"
+              disableFuture
+            />
+          </MuiPickersUtilsProvider>
+        </Box>
+      )}
       <Box>
         <FormControl fullWidth margin="normal">
           <InputLabel htmlFor="list-type">Список</InputLabel>
-          <Select inputProps={{ id: 'list-type', name: 'type' }}>
-            {[
-              { value: 'done', label: 'Прочитанные' },
-              { value: 'in-process', label: 'Читаю' },
-              { value: 'planned', label: 'Запланированные' },
-            ].map((item) => (
+          <Select
+            inputProps={{ id: 'list-type', name: 'type' }}
+            value={details.type}
+            onChange={handleChangeType}
+          >
+            {listItemTypes.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.label}
               </MenuItem>
@@ -144,7 +165,7 @@ const BookDetailsPage = () => {
         <Button>Отменить</Button>
         <div className={classes.buttonDivider} />
         <Button variant="contained" color="primary">
-          Обновить
+          {id ? 'Обновить' : 'Отменить'}
         </Button>
       </Box>
     </div>

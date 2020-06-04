@@ -20,8 +20,6 @@
     "lib": ["es6", "dom"],
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "exclude": ["node_modules", "**/build/"],
-    "include": ["src"],
     "paths": {
       "~/*": ["./src/*"]
     }

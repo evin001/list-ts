@@ -22,7 +22,7 @@ export interface ListItem {
   id: string
   doneDate?: number
   readingTarget: string
-  type: string
+  type: ListItemType
   book: Book
 }
 
@@ -36,6 +36,12 @@ export interface Book {
 export interface Author {
   name: string
   search: string
+}
+
+export enum ListItemType {
+  Done = 'done',
+  InProcess = 'in-process',
+  Planned = 'planned',
 }
 
 export async function signInByEmail(

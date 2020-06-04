@@ -9,8 +9,10 @@ const initialState: BookDetailsState = {
   listItem: undefined,
 }
 
+const thunkPrefix = 'bookDetails'
+
 export const fetchBook = createAsyncThunk(
-  'bookDetails/fetchBook',
+  `${thunkPrefix}/fetchBook`,
   async (listId: string) => {
     return await getBookFromList(listId)
   }
