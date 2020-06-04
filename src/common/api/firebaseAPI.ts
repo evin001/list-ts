@@ -14,14 +14,34 @@ const app = firebase.initializeApp({
 
 const store = firebase.firestore(app)
 
-interface UserResult {
+interface User {
   [key: string]: any
+}
+
+export interface ListItem {
+  id: string
+  doneDate?: number
+  readingTarget: string
+  type: string
+  book: Book
+}
+
+export interface Book {
+  id: string
+  description: string
+  name: string
+  authors: Record<string, Author>
+}
+
+export interface Author {
+  name: string
+  search: string
 }
 
 export async function signInByEmail(
   email: string,
   password: string
-): Promise<UserResult | null> {
+): Promise<User | null> {
   const response = await app.auth().signInWithEmailAndPassword(email, password)
   if (response.user) {
     const userResponse = await store
@@ -33,4 +53,30 @@ export async function signInByEmail(
     }
   }
   return null
+}
+
+export async function getBookFromList(listId: string): Promise<ListItem> {
+  const listDoc = await store.collection('lists').doc(listId).get()
+  const listData = listDoc.data()
+  const bookDoc = await listData?.bookId.get()
+  const bookData = bookDoc.data()
+
+  const authors: Record<string, Author> = {}
+  for (const authorRef of bookData.authors) {
+    const authorDoc = await authorRef.get()
+    authors[authorDoc.id] = authorDoc.data()
+  }
+
+  return {
+    id: listDoc.id,
+    doneDate: (listData?.doneDate as firebase.firestore.Timestamp).toMillis(),
+    readingTarget: listData?.readingTarget,
+    type: listData?.type,
+    book: {
+      id: bookDoc.id,
+      name: bookData.name,
+      description: bookData.description,
+      authors,
+    },
+  }
 }
