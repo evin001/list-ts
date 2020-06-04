@@ -26,6 +26,9 @@ const bookDetailsSlice = createSlice({
     builder.addCase(fetchBook.fulfilled, (state, action) => {
       state.listItem = action.payload
     })
+    builder.addCase(fetchBook.rejected, (state, action) => {
+      console.log({ action })
+    })
   },
 })
 

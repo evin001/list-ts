@@ -1,17 +1,23 @@
 import { Book, ListItem, ListItemType } from '~/common/api/firebaseAPI'
 
 export type BookType = keyof Omit<Book, 'id' | 'authors'>
+export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
 
 class BookDetailsForm {
+  static READING_TARGET_MAX_LENGTH = 250
+
   readonly #book: BookField
 
   #type: ListItemType
-  doneDate?: Date
+  #readingTarget: string
   #withoutDate: boolean
+
+  doneDate?: Date
 
   constructor(listItem?: ListItem, withoutDate = false) {
     this.#book = new BookField(listItem?.book)
     this.#type = listItem?.type || ListItemType.Done
+    this.#readingTarget = listItem?.readingTarget || ''
     this.doneDate =
       (listItem?.doneDate && new Date(listItem.doneDate)) || void 0
     this.#withoutDate = withoutDate
@@ -41,12 +47,29 @@ class BookDetailsForm {
     return this.#book
   }
 
+  get readingTarget() {
+    return this.#readingTarget
+  }
+
+  set readingTarget(value) {
+    this.#readingTarget = value.substr(
+      0,
+      BookDetailsForm.READING_TARGET_MAX_LENGTH
+    )
+  }
+
+  get helperTextReadingTarget() {
+    return `${this.#readingTarget.length}/${
+      BookDetailsForm.READING_TARGET_MAX_LENGTH
+    }`
+  }
+
   clone() {
     return new BookDetailsForm(
       {
         id: '',
         doneDate: this.doneDate?.getMilliseconds(),
-        readingTarget: '',
+        readingTarget: this.#readingTarget,
         type: this.#type,
         book: this.#book.toObject(),
       },

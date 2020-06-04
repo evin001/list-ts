@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
-import BookDetailsForm, { BookType } from './BookDetailsForm'
+import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
 import { fetchBook } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
 
@@ -67,38 +67,58 @@ const BookDetailsPage = () => {
     }
   }, [listItem])
 
-  const handleChangeBook = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const updateDetails = (modifier: (details: BookDetailsForm) => void) => {
     const nextDetails = details.clone()
-    nextDetails.book[event.target.id as BookType] = event.target.value
+    modifier(nextDetails)
     setDetails(nextDetails)
+  }
+
+  const handleChangeBook = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateDetails(
+      (nextDetails) =>
+        (nextDetails.book[event.target.id as BookType] = event.target.value)
+    )
+  }
+
+  const handleChangeListItem = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateDetails(
+      (nextDetails) =>
+        (nextDetails[event.target.id as BookDetailsType] = event.target.value)
+    )
   }
 
   const handleChangeType = (
     event: React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
-    const nextDetails = details.clone()
-    nextDetails.type = event.target.value as ListItemType
-    setDetails(nextDetails)
+    updateDetails(
+      (nextDetails) => (nextDetails.type = event.target.value as ListItemType)
+    )
   }
 
   const handleChangeDate = (date: Date | null) => {
-    const nextDetails = details.clone()
-    nextDetails.doneDate = date ?? void 0
-    setDetails(nextDetails)
+    updateDetails((nextDetails) => (nextDetails.doneDate = date ?? void 0))
   }
 
   const handleChangeWithoutDate = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const nextDetails = details.clone()
-    nextDetails.withoutDate = event.target.checked
-    setDetails(nextDetails)
+    updateDetails(
+      (nextDetails) => (nextDetails.withoutDate = event.target.checked)
+    )
   }
 
   return (
     <div>
       <Box>
-        <TextField label="Цель прочтения" fullWidth margin="normal" />
+        <TextField
+          id="readingTarget"
+          label="Цель прочтения"
+          fullWidth
+          margin="normal"
+          value={details.readingTarget}
+          helperText={details.helperTextReadingTarget}
+          onChange={handleChangeListItem}
+        />
       </Box>
       <Box>
         <Autocomplete

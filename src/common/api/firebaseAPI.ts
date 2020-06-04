@@ -75,7 +75,7 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
 
   return {
     id: listDoc.id,
-    doneDate: (listData?.doneDate as firebase.firestore.Timestamp).toMillis(),
+    doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
     readingTarget: listData?.readingTarget,
     type: listData?.type,
     book: {
