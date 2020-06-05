@@ -30,10 +30,11 @@ export interface Book {
   id: string
   description: string
   name: string
-  authors: Record<string, Author>
+  authors: Array<Author>
 }
 
 export interface Author {
+  id: string
   name: string
   search: string
 }
@@ -67,10 +68,13 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   const bookDoc = await listData?.bookId.get()
   const bookData = bookDoc.data()
 
-  const authors: Record<string, Author> = {}
+  const authors: Array<Author> = []
   for (const authorRef of bookData.authors) {
     const authorDoc = await authorRef.get()
-    authors[authorDoc.id] = authorDoc.data()
+    authors.push({
+      id: authorDoc.id,
+      ...authorDoc.data(),
+    })
   }
 
   return {
@@ -85,4 +89,27 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       authors,
     },
   }
+}
+
+export async function searchAuthors(needle: string): Promise<Author[]> {
+  function getEndCode(value: string): string {
+    const startCode = value.slice(0, value.length - 1)
+    const lastChar = value.slice(value.length - 1, value.length)
+    return `${startCode}${String.fromCharCode(lastChar.charCodeAt(0) + 1)}`
+  }
+
+  const normalizeNeedle = needle.toLocaleLowerCase()
+  const endCode = getEndCode(normalizeNeedle)
+  const authorsDoc = await store
+    .collection('authors')
+    .where('search', '>=', normalizeNeedle)
+    .where('search', '<', endCode)
+    .limit(10)
+    .get()
+
+  return authorsDoc.docs.map((authorDoc) => ({
+    id: authorDoc.id,
+    name: authorDoc.data().name,
+    search: authorDoc.data().search,
+  }))
 }

@@ -1,4 +1,4 @@
-import { Book, ListItem, ListItemType } from '~/common/api/firebaseAPI'
+import { Author, Book, ListItem, ListItemType } from '~/common/api/firebaseAPI'
 
 export type BookType = keyof Omit<Book, 'id' | 'authors'>
 export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
@@ -87,12 +87,14 @@ class BookField {
 
   #name: string
   #description: string
+  #authors: Array<Author>
 
   constructor(book?: Book) {
     this.#id = book?.id || ''
     this.#complete = Boolean(book)
     this.#name = book?.name ?? ''
     this.#description = book?.description ?? ''
+    this.#authors = book?.authors || []
   }
 
   get name() {
@@ -127,12 +129,29 @@ class BookField {
     return this.#complete && this.#description === ''
   }
 
+  get authors() {
+    return this.#authors
+  }
+
+  set authors(value: (string | Author)[]) {
+    this.#authors = value.map((author) => {
+      if (typeof author === 'string') {
+        return {
+          id: '',
+          name: author,
+          search: author.toLocaleLowerCase(),
+        }
+      }
+      return author
+    })
+  }
+
   toObject(): Book {
     return {
       id: this.#id,
       name: this.#name,
       description: this.#description,
-      authors: {},
+      authors: this.#authors,
     }
   }
 }

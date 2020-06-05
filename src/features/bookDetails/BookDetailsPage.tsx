@@ -17,10 +17,10 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
-import { ListItemType } from '~/common/api/firebaseAPI'
+import { Author, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
-import { fetchBook } from './bookDetailsSlice'
+import { fetchBook, findAuthors } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
 
 const useStyles = makeStyles(
@@ -46,9 +46,10 @@ const BookDetailsPage = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const { id } = useParams()
-  const { listItem } = useSelector(
+  const { listItem, filteredAuthors } = useSelector(
     (state: RootState) => ({
       listItem: state.bookDetails.listItem,
+      filteredAuthors: state.bookDetails.filteredAuthors,
     }),
     shallowEqual
   )
@@ -75,15 +76,15 @@ const BookDetailsPage = () => {
 
   const handleChangeBook = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateDetails(
-      (nextDetails) =>
-        (nextDetails.book[event.target.id as BookType] = event.target.value)
+      (details) =>
+        (details.book[event.target.id as BookType] = event.target.value)
     )
   }
 
   const handleChangeListItem = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateDetails(
-      (nextDetails) =>
-        (nextDetails[event.target.id as BookDetailsType] = event.target.value)
+      (details) =>
+        (details[event.target.id as BookDetailsType] = event.target.value)
     )
   }
 
@@ -91,20 +92,34 @@ const BookDetailsPage = () => {
     event: React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {
     updateDetails(
-      (nextDetails) => (nextDetails.type = event.target.value as ListItemType)
+      (details) => (details.type = event.target.value as ListItemType)
     )
   }
 
   const handleChangeDate = (date: Date | null) => {
-    updateDetails((nextDetails) => (nextDetails.doneDate = date ?? void 0))
+    updateDetails((details) => (details.doneDate = date ?? void 0))
   }
 
   const handleChangeWithoutDate = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    updateDetails(
-      (nextDetails) => (nextDetails.withoutDate = event.target.checked)
-    )
+    updateDetails((details) => (details.withoutDate = event.target.checked))
+  }
+
+  const handleChangeAuthor = (
+    event: React.ChangeEvent<unknown>,
+    value: (string | Author)[]
+  ) => {
+    updateDetails((details) => (details.book.authors = value))
+  }
+
+  const handleChangeAuthorInput = (
+    event: React.ChangeEvent<unknown>,
+    value: string
+  ) => {
+    if (value) {
+      dispatch(findAuthors(value))
+    }
   }
 
   return (
@@ -125,7 +140,12 @@ const BookDetailsPage = () => {
           renderInput={(params) => (
             <TextField {...params} label="Автор" required margin="normal" />
           )}
-          options={[]}
+          options={filteredAuthors}
+          getOptionLabel={(option: Author) => option.name}
+          value={details.book.authors}
+          getOptionSelected={(option, value) => option.id === value.id}
+          onChange={handleChangeAuthor}
+          onInputChange={handleChangeAuthorInput}
           multiple
           freeSolo
         />
