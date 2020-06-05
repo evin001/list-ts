@@ -21,7 +21,7 @@ import { RootState } from '~/app/rootReducer'
 import { Author, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
-import { fetchBook, findAuthors } from './bookDetailsSlice'
+import { fetchBook, findAuthors, findBooks } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
 
 const useStyles = makeStyles(
@@ -47,10 +47,11 @@ const BookDetailsPage = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const { id } = useParams()
-  const { listItem, filteredAuthors } = useSelector(
+  const { listItem, filteredAuthors, filteredBooks } = useSelector(
     (state: RootState) => ({
       listItem: state.bookDetails.listItem,
       filteredAuthors: state.bookDetails.filteredAuthors,
+      filteredBooks: state.bookDetails.filteredBooks.map((v) => v.name),
     }),
     shallowEqual
   )
@@ -123,6 +124,28 @@ const BookDetailsPage = () => {
     300
   )
 
+  const handleChangeBookName = (
+    event: React.ChangeEvent<unknown>,
+    value: string | null
+  ) => {
+    updateDetails((details) => (details.book.name = value || ''))
+  }
+
+  const handleChangeBookNameInput = debounce(
+    (event: React.ChangeEvent<unknown>, value: string) => {
+      handleChangeBookName(event, value)
+      if (value && details.book.authors.length) {
+        dispatch(
+          findBooks({
+            needle: value,
+            authors: details.book.authors.map((a) => a as Author),
+          })
+        )
+      }
+    },
+    300
+  )
+
   return (
     <div>
       <Box>
@@ -158,16 +181,24 @@ const BookDetailsPage = () => {
         />
       </Box>
       <Box>
-        <TextField
-          id="name"
-          label="Название"
-          required
-          fullWidth
-          margin="normal"
+        <Autocomplete
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              id="name"
+              label="Название"
+              required
+              fullWidth
+              margin="normal"
+              error={details.book.errorName}
+              helperText={details.book.helperTextName}
+            />
+          )}
+          options={filteredBooks}
           value={details.book.name}
-          error={details.book.errorName}
-          helperText={details.book.helperTextName}
-          onChange={handleChangeBook}
+          onChange={handleChangeBookName}
+          onInputChange={handleChangeBookNameInput}
+          freeSolo
         />
       </Box>
       <Box>

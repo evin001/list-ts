@@ -39,6 +39,11 @@ export interface Author {
   search: string
 }
 
+export interface FilteredBook {
+  id: string
+  name: string
+}
+
 export enum ListItemType {
   Done = 'done',
   InProcess = 'in-process',
@@ -91,13 +96,13 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   }
 }
 
-export async function searchAuthors(needle: string): Promise<Author[]> {
-  function getEndCode(value: string): string {
-    const startCode = value.slice(0, value.length - 1)
-    const lastChar = value.slice(value.length - 1, value.length)
-    return `${startCode}${String.fromCharCode(lastChar.charCodeAt(0) + 1)}`
-  }
+function getEndCode(value: string): string {
+  const startCode = value.slice(0, value.length - 1)
+  const lastChar = value.slice(value.length - 1, value.length)
+  return `${startCode}${String.fromCharCode(lastChar.charCodeAt(0) + 1)}`
+}
 
+export async function searchAuthors(needle: string): Promise<Author[]> {
   const normalizeNeedle = needle.toLocaleLowerCase()
   const endCode = getEndCode(normalizeNeedle)
   const authorsDoc = await store
@@ -111,5 +116,29 @@ export async function searchAuthors(needle: string): Promise<Author[]> {
     id: authorDoc.id,
     name: authorDoc.data().name,
     search: authorDoc.data().search,
+  }))
+}
+
+export async function searchBooks(
+  needle: string,
+  authors: Author[]
+): Promise<FilteredBook[]> {
+  const normalizeNeedle = needle.toLocaleLowerCase()
+  const endCode = getEndCode(normalizeNeedle)
+  const booksDoc = await store
+    .collection('books')
+    .where('search', '>=', normalizeNeedle)
+    .where('search', '<', endCode)
+    .where(
+      'authors',
+      'array-contains-any',
+      authors.map((author) => store.collection('authors').doc(author.id))
+    )
+    .limit(10)
+    .get()
+
+  return booksDoc.docs.map((bookDoc) => ({
+    id: bookDoc.id,
+    name: bookDoc.data().name,
   }))
 }
