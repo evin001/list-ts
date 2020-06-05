@@ -139,7 +139,13 @@ const BookDetailsPage = () => {
       <Box>
         <Autocomplete
           renderInput={(params) => (
-            <TextField {...params} label="Автор" required margin="normal" />
+            <TextField
+              {...params}
+              label="Автор"
+              required
+              margin="normal"
+              helperText={details.book.helpTextAuthors}
+            />
           )}
           options={filteredAuthors}
           getOptionLabel={(option: Author) => option.name}

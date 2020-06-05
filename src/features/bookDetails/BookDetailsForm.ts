@@ -81,6 +81,7 @@ class BookDetailsForm {
 class BookField {
   static NAME_MAX_LENGTH = 100
   static DESCRIPTION_MAX_LENGTH = 1000
+  static AUTHORS_MAX_COUNT = 5
 
   readonly #id: string
   readonly #complete: boolean
@@ -134,16 +135,22 @@ class BookField {
   }
 
   set authors(value: (string | Author)[]) {
-    this.#authors = value.map((author) => {
-      if (typeof author === 'string') {
-        return {
-          id: '',
-          name: author,
-          search: author.toLocaleLowerCase(),
+    this.#authors = value
+      .map((author) => {
+        if (typeof author === 'string') {
+          return {
+            id: '',
+            name: author,
+            search: author.toLocaleLowerCase(),
+          }
         }
-      }
-      return author
-    })
+        return author
+      })
+      .slice(0, BookField.AUTHORS_MAX_COUNT)
+  }
+
+  get helpTextAuthors() {
+    return `${this.#authors.length}/${BookField.AUTHORS_MAX_COUNT}`
   }
 
   toObject(): Book {
