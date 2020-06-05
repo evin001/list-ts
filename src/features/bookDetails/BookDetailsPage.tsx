@@ -13,6 +13,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { useDidMount } from 'beautiful-react-hooks'
 import ruLocale from 'date-fns/locale/ru'
+import debounce from 'lodash/debounce'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -113,14 +114,14 @@ const BookDetailsPage = () => {
     updateDetails((details) => (details.book.authors = value))
   }
 
-  const handleChangeAuthorInput = (
-    event: React.ChangeEvent<unknown>,
-    value: string
-  ) => {
-    if (value) {
-      dispatch(findAuthors(value))
-    }
-  }
+  const handleChangeAuthorInput = debounce(
+    (event: React.ChangeEvent<unknown>, value: string) => {
+      if (value) {
+        dispatch(findAuthors(value))
+      }
+    },
+    300
+  )
 
   return (
     <div>
