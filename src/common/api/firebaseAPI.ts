@@ -39,10 +39,7 @@ export interface Author {
   search: string
 }
 
-export interface FilteredBook {
-  id: string
-  name: string
-}
+export type FilteredBook = Omit<Book, 'authors'>
 
 export enum ListItemType {
   Done = 'done',
@@ -140,5 +137,6 @@ export async function searchBooks(
   return booksDoc.docs.map((bookDoc) => ({
     id: bookDoc.id,
     name: bookDoc.data().name,
+    description: bookDoc.data().description,
   }))
 }

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import {
   getBookFromList,
   searchAuthors,
@@ -70,5 +70,10 @@ const bookDetailsSlice = createSlice({
     })
   },
 })
+
+export const getFilteredBooks = (state: BookDetailsState) => state.filteredBooks
+export const selectBookNames = createSelector(getFilteredBooks, (books) =>
+  books.map((book) => book.name)
+)
 
 export default bookDetailsSlice.reducer

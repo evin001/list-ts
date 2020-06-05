@@ -21,7 +21,12 @@ import { RootState } from '~/app/rootReducer'
 import { Author, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
-import { fetchBook, findAuthors, findBooks } from './bookDetailsSlice'
+import {
+  fetchBook,
+  findAuthors,
+  findBooks,
+  selectBookNames,
+} from './bookDetailsSlice'
 import { listItemTypes } from './constants'
 
 const useStyles = makeStyles(
@@ -47,11 +52,17 @@ const BookDetailsPage = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const { id } = useParams()
-  const { listItem, filteredAuthors, filteredBooks } = useSelector(
+  const {
+    listItem,
+    filteredAuthors,
+    filteredBooks,
+    filteredBookNames,
+  } = useSelector(
     (state: RootState) => ({
       listItem: state.bookDetails.listItem,
       filteredAuthors: state.bookDetails.filteredAuthors,
-      filteredBooks: state.bookDetails.filteredBooks.map((v) => v.name),
+      filteredBooks: state.bookDetails.filteredBooks,
+      filteredBookNames: selectBookNames(state.bookDetails),
     }),
     shallowEqual
   )
@@ -128,7 +139,13 @@ const BookDetailsPage = () => {
     event: React.ChangeEvent<unknown>,
     value: string | null
   ) => {
-    updateDetails((details) => (details.book.name = value || ''))
+    updateDetails((details) => {
+      details.book.name = value || ''
+      const filteredBookIndex = filteredBooks.findIndex((b) => b.name === value)
+      if (value && ~filteredBookIndex) {
+        details.book.description = filteredBooks[filteredBookIndex].description
+      }
+    })
   }
 
   const handleChangeBookNameInput = debounce(
@@ -194,7 +211,7 @@ const BookDetailsPage = () => {
               helperText={details.book.helperTextName}
             />
           )}
-          options={filteredBooks}
+          options={filteredBookNames}
           value={details.book.name}
           onChange={handleChangeBookName}
           onInputChange={handleChangeBookNameInput}
