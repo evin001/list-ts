@@ -10,6 +10,7 @@ module.exports = {
       {
         singleQuote: true,
         semi: false,
+        endOfLine: 'auto',
       },
     ],
     '@typescript-eslint/explicit-module-boundary-types': 'off',

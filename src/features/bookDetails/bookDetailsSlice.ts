@@ -7,6 +7,7 @@ import {
   Author,
   FilteredBook,
 } from '~/common/api/firebaseAPI'
+import { loading, loaded } from '~/features/loader/loaderSlice'
 
 interface BookDetailsState {
   listItem?: ListItem
@@ -24,8 +25,13 @@ const thunkPrefix = 'bookDetails'
 
 export const fetchBook = createAsyncThunk(
   `${thunkPrefix}/fetchBook`,
-  async (listId: string) => {
-    return await getBookFromList(listId)
+  async (listId: string, { dispatch }) => {
+    try {
+      dispatch(loading())
+      return await getBookFromList(listId)
+    } finally {
+      dispatch(loaded())
+    }
   }
 )
 
