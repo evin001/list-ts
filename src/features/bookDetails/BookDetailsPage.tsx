@@ -20,6 +20,7 @@ import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Author, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
+import { redirect } from '~/features/location/locationSlice'
 import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
 import {
   fetchBook,
@@ -42,6 +43,12 @@ const useStyles = makeStyles(
       margin: `${theme.spacing(2)}px 0 ${theme.spacing(1)}px`,
       '& > div': {
         width: '100%',
+      },
+    },
+    cover: {
+      marginTop: theme.spacing(1),
+      '& input': {
+        display: 'none',
       },
     },
   }),
@@ -163,6 +170,8 @@ const BookDetailsPage = () => {
     300
   )
 
+  const handleCancel = () => dispatch(redirect('/'))
+
   return (
     <div>
       <Box>
@@ -233,8 +242,18 @@ const BookDetailsPage = () => {
           onChange={handleChangeBook}
         />
       </Box>
-      <Box>
-        <TextField type="file" label="Обложка" fullWidth margin="normal" />
+      <Box className={classes.cover}>
+        <input
+          accept=".jpg, .jpeg, .png"
+          className={classes.cover}
+          id="contained-cover-file"
+          type="file"
+        />
+        <label htmlFor="contained-cover-file">
+          <Button variant="contained" color="primary" component="span">
+            Обложка
+          </Button>
+        </label>
       </Box>
       {details.type === ListItemType.Done && (
         <React.Fragment>
@@ -282,10 +301,10 @@ const BookDetailsPage = () => {
         </FormControl>
       </Box>
       <Box className={classes.footer}>
-        <Button>Отменить</Button>
+        <Button onClick={handleCancel}>Отменить</Button>
         <div className={classes.buttonDivider} />
         <Button variant="contained" color="primary">
-          {id ? 'Обновить' : 'Отменить'}
+          {id ? 'Обновить' : 'Создать'}
         </Button>
       </Box>
     </div>
