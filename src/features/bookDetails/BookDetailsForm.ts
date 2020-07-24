@@ -89,6 +89,7 @@ class BookField {
   #name: string
   #description: string
   #authors: Array<Author>
+  #cover?: File
 
   constructor(book?: Book) {
     this.#id = book?.id || ''

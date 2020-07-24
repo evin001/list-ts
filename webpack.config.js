@@ -34,6 +34,17 @@ module.exports = {
         test: /\.((woff(2)?)|ttf|eot|otf)(\?[a-z0-9#=&.]+)?$/,
         use: 'file-loader',
       },
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: 'assets/[name].[ext]'
+            }
+          }
+        ]
+      }
     ],
   },
   plugins: [

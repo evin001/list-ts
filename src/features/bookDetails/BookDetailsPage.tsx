@@ -6,6 +6,7 @@ import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
+import Paper from '@material-ui/core/Paper'
 import Select from '@material-ui/core/Select'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
@@ -29,6 +30,7 @@ import {
   selectBookNames,
 } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
+import coverImage from './undraw_book_lover_mkck.svg'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -50,6 +52,22 @@ const useStyles = makeStyles(
       '& input': {
         display: 'none',
       },
+    },
+    coverImage: {
+      display: 'flex',
+      alignItems: 'center',
+      flexShrink: 0,
+      width: '160px',
+      height: '230px',
+      padding: '3px',
+      marginLeft: '25px',
+      '& img': {
+        width: '100%',
+        height: 'auto',
+      },
+    },
+    row: {
+      display: 'flex',
     },
   }),
   { name: 'BookDetailsPage' }
@@ -172,6 +190,25 @@ const BookDetailsPage = () => {
 
   const handleCancel = () => dispatch(redirect('/'))
 
+  const handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const file = event.target.files[0]
+      // const sizeMb = file.size / (1024 * 1024)
+      const image = document.getElementById('cover') as HTMLImageElement
+      if (image) {
+        const reader = new FileReader()
+        reader.onload = (function (aImg: HTMLImageElement) {
+          return function (e: ProgressEvent<FileReader>) {
+            if (e.target) {
+              aImg.src = e.target.result as string
+            }
+          }
+        })(image)
+        reader.readAsDataURL(file)
+      }
+    }
+  }
+
   return (
     <div>
       <Box>
@@ -227,7 +264,7 @@ const BookDetailsPage = () => {
           freeSolo
         />
       </Box>
-      <Box>
+      <Box className={classes.row}>
         <TextField
           id="description"
           label="Описание"
@@ -241,6 +278,9 @@ const BookDetailsPage = () => {
           helperText={details.book.helpTextDescription}
           onChange={handleChangeBook}
         />
+        <Paper className={classes.coverImage}>
+          <img id="cover" src={coverImage} alt="Обложка" />
+        </Paper>
       </Box>
       <Box className={classes.cover}>
         <input
@@ -248,6 +288,7 @@ const BookDetailsPage = () => {
           className={classes.cover}
           id="contained-cover-file"
           type="file"
+          onChange={handleChangeFile}
         />
         <label htmlFor="contained-cover-file">
           <Button variant="contained" color="primary" component="span">
