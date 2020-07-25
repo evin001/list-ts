@@ -14,7 +14,7 @@ const app = firebase.initializeApp({
 
 const store = firebase.firestore(app)
 
-interface User {
+export interface User {
   [key: string]: any
 }
 
@@ -30,16 +30,27 @@ export interface Book {
   id: string
   description: string
   name: string
-  authors: Array<Author>
+  authors: Author[]
+  genres: Genre[]
+  tags: Tag[]
 }
 
-export interface Author {
-  id: string
+export interface Author extends ID {
   name: string
   search: string
 }
 
-export type FilteredBook = Omit<Book, 'authors'>
+export interface Genre extends ID {
+  name: string
+}
+
+export interface Tag extends ID {
+  name: string
+}
+
+export type ID = { id: string }
+
+export type FilteredBook = Omit<Book, 'authors' | 'genres' | 'tags'>
 
 export enum ListItemType {
   Done = 'done',
@@ -67,17 +78,13 @@ export async function signInByEmail(
 export async function getBookFromList(listId: string): Promise<ListItem> {
   const listDoc = await store.collection('lists').doc(listId).get()
   const listData = listDoc.data()
+
   const bookDoc = await listData?.bookId.get()
   const bookData = bookDoc.data()
 
-  const authors: Array<Author> = []
-  for (const authorRef of bookData.authors) {
-    const authorDoc = await authorRef.get()
-    authors.push({
-      id: authorDoc.id,
-      ...authorDoc.data(),
-    })
-  }
+  const authors = await fetchCollections<Author>(bookData.authors)
+  const genres = await fetchCollections<Genre>(bookData.genres)
+  const tags = await fetchCollections<Tag>(bookData.tags)
 
   return {
     id: listDoc.id,
@@ -89,8 +96,25 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       name: bookData.name,
       description: bookData.description,
       authors,
+      genres,
+      tags,
     },
   }
+}
+
+async function fetchCollections<T extends ID>(
+  refs: firebase.firestore.DocumentReference[]
+): Promise<T[]> {
+  const res: T[] = []
+  if (!refs) return res
+  for (const ref of refs) {
+    const doc = await ref.get()
+    res.push({
+      id: doc.id,
+      ...doc.data(),
+    } as T)
+  }
+  return res
 }
 
 function getEndCode(value: string): string {

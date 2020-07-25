@@ -1,6 +1,13 @@
-import { Author, Book, ListItem, ListItemType } from '~/common/api/firebaseAPI'
+import {
+  Author,
+  Book,
+  Genre,
+  Tag,
+  ListItem,
+  ListItemType,
+} from '~/common/api/firebaseAPI'
 
-export type BookType = keyof Omit<Book, 'id' | 'authors'>
+export type BookType = keyof Omit<Book, 'id' | 'authors' | 'genres' | 'tags'>
 export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
 
 class BookDetailsForm {
@@ -82,14 +89,17 @@ class BookField {
   static NAME_MAX_LENGTH = 100
   static DESCRIPTION_MAX_LENGTH = 1000
   static AUTHORS_MAX_COUNT = 5
+  static GENRES_MAX_COUNT = 10
+  static TAGS_MAX_COUNT = 10
 
   readonly #id: string
   readonly #complete: boolean
 
   #name: string
   #description: string
-  #authors: Array<Author>
-  #cover?: File
+  #authors: Author[]
+  #genres: Genre[]
+  #tags: Tag[]
 
   constructor(book?: Book) {
     this.#id = book?.id || ''
@@ -97,6 +107,8 @@ class BookField {
     this.#name = book?.name ?? ''
     this.#description = book?.description ?? ''
     this.#authors = book?.authors || []
+    this.#genres = book?.genres || []
+    this.#tags = book?.tags || []
   }
 
   get name() {
@@ -154,12 +166,30 @@ class BookField {
     return `${this.#authors.length}/${BookField.AUTHORS_MAX_COUNT}`
   }
 
+  get genres() {
+    return this.#genres
+  }
+
+  get helpTextGenres() {
+    return `${this.#genres.length}/${BookField.GENRES_MAX_COUNT}`
+  }
+
+  get tags() {
+    return this.#tags
+  }
+
+  get helpTextTags() {
+    return `${this.#tags.length}/${BookField.TAGS_MAX_COUNT}`
+  }
+
   toObject(): Book {
     return {
       id: this.#id,
       name: this.#name,
       description: this.#description,
       authors: this.#authors,
+      genres: this.#genres,
+      tags: this.#tags,
     }
   }
 }

@@ -58,6 +58,7 @@ const bookDetailsSlice = createSlice({
       state.listItem = action.payload
     })
     builder.addCase(fetchBook.rejected, (state, action) => {
+      // TODO Redirect to not found page
       console.log({ action })
     })
 

@@ -12,6 +12,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
+import { AsyncThunkAction } from '@reduxjs/toolkit'
 import { useDidMount } from 'beautiful-react-hooks'
 import ruLocale from 'date-fns/locale/ru'
 import debounce from 'lodash/debounce'
@@ -19,7 +20,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
-import { Author, ListItemType } from '~/common/api/firebaseAPI'
+import { Author, Genre, Tag, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
 import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
@@ -151,14 +152,14 @@ const BookDetailsPage = () => {
     updateDetails((details) => (details.book.authors = value))
   }
 
-  const handleChangeAuthorInput = debounce(
-    (event: React.ChangeEvent<unknown>, value: string) => {
+  const handleChangeAutocompleteInput = (
+    action: (args: string) => AsyncThunkAction<any, any, any>
+  ) =>
+    debounce((event: React.ChangeEvent<unknown>, value: string) => {
       if (value) {
-        dispatch(findAuthors(value))
+        dispatch(action(value))
       }
-    },
-    300
-  )
+    }, 300)
 
   const handleChangeBookName = (
     event: React.ChangeEvent<unknown>,
@@ -227,7 +228,44 @@ const BookDetailsPage = () => {
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Автор"
+              label="Жанры"
+              required
+              margin="normal"
+              helperText={details.book.helpTextGenres}
+            />
+          )}
+          options={[]}
+          getOptionLabel={(option: Genre) => option.name}
+          value={details.book.genres}
+          getOptionSelected={(option, value) => option.id === value.id}
+          multiple
+          freeSolo
+        />
+      </Box>
+      <Box>
+        <Autocomplete
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Теги"
+              margin="normal"
+              helperText={details.book.helpTextTags}
+            />
+          )}
+          options={[]}
+          getOptionLabel={(option: Tag) => option.name}
+          value={details.book.tags}
+          getOptionSelected={(option, value) => option.id === value.id}
+          multiple
+          freeSolo
+        />
+      </Box>
+      <Box>
+        <Autocomplete
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Авторы"
               required
               margin="normal"
               helperText={details.book.helpTextAuthors}
@@ -238,7 +276,7 @@ const BookDetailsPage = () => {
           value={details.book.authors}
           getOptionSelected={(option, value) => option.id === value.id}
           onChange={handleChangeAuthor}
-          onInputChange={handleChangeAuthorInput}
+          onInputChange={handleChangeAutocompleteInput(findAuthors)}
           multiple
           freeSolo
         />
