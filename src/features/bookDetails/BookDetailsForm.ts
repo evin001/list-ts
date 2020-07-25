@@ -9,6 +9,7 @@ import {
 
 export type BookType = keyof Omit<Book, 'id' | 'authors' | 'genres' | 'tags'>
 export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
+export type AutocompleteBookType = 'authors' | 'genres' | 'tags'
 
 class BookDetailsForm {
   static READING_TARGET_MAX_LENGTH = 250
@@ -148,18 +149,11 @@ class BookField {
   }
 
   set authors(value: (string | Author)[]) {
-    this.#authors = value
-      .map((author) => {
-        if (typeof author === 'string') {
-          return {
-            id: '',
-            name: author,
-            search: author.toLocaleLowerCase(),
-          }
-        }
-        return author
-      })
-      .slice(0, BookField.AUTHORS_MAX_COUNT)
+    this.#authors = this.#genres = setFilteredField<Author>(
+      value,
+      BookField.AUTHORS_MAX_COUNT,
+      true
+    )
   }
 
   get helpTextAuthors() {
@@ -170,12 +164,24 @@ class BookField {
     return this.#genres
   }
 
+  set genres(value: (string | Genre)[]) {
+    this.#genres = setFilteredField<Genre>(
+      value,
+      BookField.GENRES_MAX_COUNT,
+      false
+    )
+  }
+
   get helpTextGenres() {
     return `${this.#genres.length}/${BookField.GENRES_MAX_COUNT}`
   }
 
   get tags() {
     return this.#tags
+  }
+
+  set tags(value: (string | Tag)[]) {
+    this.#tags = setFilteredField<Tag>(value, BookField.TAGS_MAX_COUNT, false)
   }
 
   get helpTextTags() {
@@ -192,6 +198,25 @@ class BookField {
       tags: this.#tags,
     }
   }
+}
+
+function setFilteredField<T>(
+  value: (string | T)[],
+  limit: number,
+  search: boolean
+): T[] {
+  return value
+    .map((item) => {
+      if (typeof item === 'string') {
+        return ({
+          id: '',
+          name: item,
+          ...(search ? { search: item.toLocaleLowerCase() } : {}),
+        } as unknown) as T
+      }
+      return item
+    })
+    .slice(0, limit)
 }
 
 export default BookDetailsForm

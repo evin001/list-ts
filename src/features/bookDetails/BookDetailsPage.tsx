@@ -23,10 +23,16 @@ import { RootState } from '~/app/rootReducer'
 import { Author, Genre, Tag, ListItemType } from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
-import BookDetailsForm, { BookDetailsType, BookType } from './BookDetailsForm'
+import BookDetailsForm, {
+  BookDetailsType,
+  BookType,
+  AutocompleteBookType,
+} from './BookDetailsForm'
 import {
   fetchBook,
   findAuthors,
+  findGenres,
+  findTags,
   findBooks,
   selectBookNames,
 } from './bookDetailsSlice'
@@ -80,6 +86,8 @@ const BookDetailsPage = () => {
   const { id } = useParams()
   const {
     listItem,
+    filteredGenres,
+    filteredTags,
     filteredAuthors,
     filteredBooks,
     filteredBookNames,
@@ -87,6 +95,8 @@ const BookDetailsPage = () => {
     (state: RootState) => ({
       listItem: state.bookDetails.listItem,
       filteredAuthors: state.bookDetails.filteredAuthors,
+      filteredGenres: state.bookDetails.filteredGenres,
+      filteredTags: state.bookDetails.filteredTags,
       filteredBooks: state.bookDetails.filteredBooks,
       filteredBookNames: selectBookNames(state.bookDetails),
     }),
@@ -145,11 +155,10 @@ const BookDetailsPage = () => {
     updateDetails((details) => (details.withoutDate = event.target.checked))
   }
 
-  const handleChangeAuthor = (
-    event: React.ChangeEvent<unknown>,
-    value: (string | Author)[]
-  ) => {
-    updateDetails((details) => (details.book.authors = value))
+  function handleChangeAutocomplete(field: AutocompleteBookType) {
+    return (event: React.ChangeEvent<unknown>, value: (string | any)[]) => {
+      updateDetails((details) => (details.book[field] = value))
+    }
   }
 
   const handleChangeAutocompleteInput = (
@@ -234,10 +243,12 @@ const BookDetailsPage = () => {
               helperText={details.book.helpTextGenres}
             />
           )}
-          options={[]}
+          options={filteredGenres}
           getOptionLabel={(option: Genre) => option.name}
           value={details.book.genres}
           getOptionSelected={(option, value) => option.id === value.id}
+          onChange={handleChangeAutocomplete('genres')}
+          onInputChange={handleChangeAutocompleteInput(findGenres)}
           multiple
           freeSolo
         />
@@ -252,10 +263,12 @@ const BookDetailsPage = () => {
               helperText={details.book.helpTextTags}
             />
           )}
-          options={[]}
+          options={filteredTags}
           getOptionLabel={(option: Tag) => option.name}
           value={details.book.tags}
           getOptionSelected={(option, value) => option.id === value.id}
+          onChange={handleChangeAutocomplete('tags')}
+          onInputChange={handleChangeAutocompleteInput(findTags)}
           multiple
           freeSolo
         />
@@ -275,7 +288,7 @@ const BookDetailsPage = () => {
           getOptionLabel={(option: Author) => option.name}
           value={details.book.authors}
           getOptionSelected={(option, value) => option.id === value.id}
-          onChange={handleChangeAuthor}
+          onChange={handleChangeAutocomplete('authors')}
           onInputChange={handleChangeAutocompleteInput(findAuthors)}
           multiple
           freeSolo

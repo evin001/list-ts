@@ -102,6 +102,18 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   }
 }
 
+export async function searchAuthors(needle: string): Promise<Author[]> {
+  return searchInCollection<Author>(needle, 'authors')
+}
+
+export function searchGenres(needle: string): Promise<Genre[]> {
+  return searchInCollection<Genre>(needle, 'genres', 'name')
+}
+
+export function searchTags(needle: string): Promise<Tag[]> {
+  return searchInCollection<Genre>(needle, 'tags', 'name')
+}
+
 async function fetchCollections<T extends ID>(
   refs: firebase.firestore.DocumentReference[]
 ): Promise<T[]> {
@@ -123,21 +135,28 @@ function getEndCode(value: string): string {
   return `${startCode}${String.fromCharCode(lastChar.charCodeAt(0) + 1)}`
 }
 
-export async function searchAuthors(needle: string): Promise<Author[]> {
+async function searchInCollection<T extends ID>(
+  needle: string,
+  collection: string,
+  searchField = 'search'
+): Promise<T[]> {
   const normalizeNeedle = needle.toLocaleLowerCase()
   const endCode = getEndCode(normalizeNeedle)
-  const authorsDoc = await store
-    .collection('authors')
-    .where('search', '>=', normalizeNeedle)
-    .where('search', '<', endCode)
+  const querySnapshot = await store
+    .collection(collection)
+    .where(searchField, '>=', normalizeNeedle)
+    .where(searchField, '<', endCode)
     .limit(10)
     .get()
 
-  return authorsDoc.docs.map((authorDoc) => ({
-    id: authorDoc.id,
-    name: authorDoc.data().name,
-    search: authorDoc.data().search,
-  }))
+  return querySnapshot.docs.map(
+    (doc) =>
+      (({
+        id: doc.id,
+        name: doc.data().name,
+        ...(doc.data().search ? { search: doc.data().search } : {}),
+      } as unknown) as T)
+  )
 }
 
 export async function searchBooks(
