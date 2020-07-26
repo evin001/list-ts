@@ -257,6 +257,7 @@ const BookDetailsPage = () => {
           fullWidth
           value={details.book.edition}
           onChange={handleChangeBook}
+          helperText={details.book.helpTextEdition}
         />
       </Box>
       <Box>
@@ -331,7 +332,6 @@ const BookDetailsPage = () => {
               required
               fullWidth
               margin="normal"
-              error={details.book.errorName}
               helperText={details.book.helperTextName}
             />
           )}
@@ -352,7 +352,6 @@ const BookDetailsPage = () => {
           rowsMax={10}
           margin="normal"
           value={details.book.description}
-          error={details.book.errorDescription}
           helperText={details.book.helpTextDescription}
           onChange={handleChangeBook}
         />
@@ -422,8 +421,7 @@ const BookDetailsPage = () => {
       <Box className={classes.footer}>
         <Button onClick={handleCancel}>Отменить</Button>
         <div className={classes.buttonDivider} />
-        {/* TODO button disabled status */}
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" disabled={details.hasError}>
           {id ? 'Обновить' : 'Создать'}
         </Button>
       </Box>

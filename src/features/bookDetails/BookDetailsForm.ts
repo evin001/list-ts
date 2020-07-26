@@ -31,6 +31,10 @@ class BookDetailsForm {
     this.#withoutDate = withoutDate
   }
 
+  get hasError(): boolean {
+    return this.#book.hasError
+  }
+
   get type() {
     return this.#type
   }
@@ -89,12 +93,12 @@ class BookDetailsForm {
 class BookField {
   static NAME_MAX_LENGTH = 100
   static DESCRIPTION_MAX_LENGTH = 1000
+  static EDITION_MAX_LENGTH = 20
   static AUTHORS_MAX_COUNT = 5
   static GENRES_MAX_COUNT = 10
   static TAGS_MAX_COUNT = 10
 
   readonly #id: string
-  readonly #complete: boolean
 
   #name: string
   #description: string
@@ -106,7 +110,6 @@ class BookField {
 
   constructor(book?: Book) {
     this.#id = book?.id || ''
-    this.#complete = Boolean(book)
     this.#name = book?.name ?? ''
     this.#description = book?.description ?? ''
     this.#year = book?.year ?? ''
@@ -114,6 +117,17 @@ class BookField {
     this.#authors = book?.authors || []
     this.#genres = book?.genres || []
     this.#tags = book?.tags || []
+  }
+
+  get hasError(): boolean {
+    return (
+      this.#year === '' ||
+      this.#year === '0' ||
+      this.#genres.length === 0 ||
+      this.#authors.length === 0 ||
+      this.#name === '' ||
+      this.#description === ''
+    )
   }
 
   get name() {
@@ -128,10 +142,6 @@ class BookField {
     return `${this.#name.length}/${BookField.NAME_MAX_LENGTH}`
   }
 
-  get errorName() {
-    return this.#complete && this.#name === ''
-  }
-
   get description() {
     return this.#description
   }
@@ -142,10 +152,6 @@ class BookField {
 
   get helpTextDescription() {
     return `${this.#description.length}/${BookField.DESCRIPTION_MAX_LENGTH}`
-  }
-
-  get errorDescription() {
-    return this.#complete && this.#description === ''
   }
 
   get year() {
@@ -161,7 +167,11 @@ class BookField {
   }
 
   set edition(value) {
-    this.#edition = value
+    this.#edition = value.substr(0, BookField.EDITION_MAX_LENGTH)
+  }
+
+  get helpTextEdition() {
+    return `${this.#edition.length}/${BookField.EDITION_MAX_LENGTH}`
   }
 
   get authors() {
@@ -169,7 +179,7 @@ class BookField {
   }
 
   set authors(value: (string | Author)[]) {
-    this.#authors = this.#genres = setFilteredField<Author>(
+    this.#authors = setFilteredField<Author>(
       value,
       BookField.AUTHORS_MAX_COUNT,
       true
