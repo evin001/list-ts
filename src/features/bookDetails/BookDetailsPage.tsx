@@ -226,6 +226,10 @@ const BookDetailsPage = () => {
     }
   }
 
+  const handleSave = () => {
+    console.log(details.toObject())
+  }
+
   return (
     <div>
       <Box>
@@ -421,7 +425,12 @@ const BookDetailsPage = () => {
       <Box className={classes.footer}>
         <Button onClick={handleCancel}>Отменить</Button>
         <div className={classes.buttonDivider} />
-        <Button variant="contained" color="primary" disabled={details.hasError}>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={details.hasError}
+          onClick={handleSave}
+        >
           {id ? 'Обновить' : 'Создать'}
         </Button>
       </Box>
