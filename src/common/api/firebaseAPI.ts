@@ -30,6 +30,8 @@ export interface Book {
   id: string
   description: string
   name: string
+  year: string
+  edition: string
   authors: Author[]
   genres: Genre[]
   tags: Tag[]
@@ -95,6 +97,8 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       id: bookDoc.id,
       name: bookData.name,
       description: bookData.description,
+      year: bookData.year,
+      edition: bookData.edition,
       authors,
       genres,
       tags,
@@ -181,5 +185,7 @@ export async function searchBooks(
     id: bookDoc.id,
     name: bookDoc.data().name,
     description: bookDoc.data().description,
+    year: bookDoc.data().year,
+    edition: bookDoc.data().edition,
   }))
 }

@@ -71,10 +71,17 @@ const useStyles = makeStyles(
       '& img': {
         width: '100%',
         height: 'auto',
+        maxHeight: '100%',
       },
     },
     row: {
       display: 'flex',
+    },
+    yearAndEdition: {
+      display: 'flex',
+      '& > :first-child': {
+        marginRight: theme.spacing(2),
+      },
     },
   }),
   { name: 'BookDetailsPage' }
@@ -230,6 +237,26 @@ const BookDetailsPage = () => {
           value={details.readingTarget}
           helperText={details.helperTextReadingTarget}
           onChange={handleChangeListItem}
+        />
+      </Box>
+      <Box className={classes.yearAndEdition}>
+        <TextField
+          id="year"
+          label="Год"
+          margin="normal"
+          required
+          fullWidth
+          type="number"
+          value={details.book.year}
+          onChange={handleChangeBook}
+        />
+        <TextField
+          id="edition"
+          label="Издание"
+          margin="normal"
+          fullWidth
+          value={details.book.edition}
+          onChange={handleChangeBook}
         />
       </Box>
       <Box>
@@ -395,6 +422,7 @@ const BookDetailsPage = () => {
       <Box className={classes.footer}>
         <Button onClick={handleCancel}>Отменить</Button>
         <div className={classes.buttonDivider} />
+        {/* TODO button disabled status */}
         <Button variant="contained" color="primary">
           {id ? 'Обновить' : 'Создать'}
         </Button>

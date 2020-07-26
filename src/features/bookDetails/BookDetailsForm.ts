@@ -98,6 +98,8 @@ class BookField {
 
   #name: string
   #description: string
+  #year: string
+  #edition: string
   #authors: Author[]
   #genres: Genre[]
   #tags: Tag[]
@@ -107,6 +109,8 @@ class BookField {
     this.#complete = Boolean(book)
     this.#name = book?.name ?? ''
     this.#description = book?.description ?? ''
+    this.#year = book?.year ?? ''
+    this.#edition = book?.edition ?? ''
     this.#authors = book?.authors || []
     this.#genres = book?.genres || []
     this.#tags = book?.tags || []
@@ -142,6 +146,22 @@ class BookField {
 
   get errorDescription() {
     return this.#complete && this.#description === ''
+  }
+
+  get year() {
+    return this.#year
+  }
+
+  set year(value) {
+    this.#year = value
+  }
+
+  get edition() {
+    return this.#edition
+  }
+
+  set edition(value) {
+    this.#edition = value
   }
 
   get authors() {
@@ -193,6 +213,8 @@ class BookField {
       id: this.#id,
       name: this.#name,
       description: this.#description,
+      year: this.#year,
+      edition: this.#edition,
       authors: this.#authors,
       genres: this.#genres,
       tags: this.#tags,
@@ -210,7 +232,7 @@ function setFilteredField<T>(
       if (typeof item === 'string') {
         return ({
           id: '',
-          name: item,
+          name: search ? item : item.toLocaleLowerCase(),
           ...(search ? { search: item.toLocaleLowerCase() } : {}),
         } as unknown) as T
       }
