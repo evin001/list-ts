@@ -29,7 +29,9 @@ class BookDetailsForm {
     this.#type = listItem?.type || ListItemType.Done
     this.#readingTarget = listItem?.readingTarget || ''
     this.doneDate =
-      (listItem?.doneDate && new Date(listItem.doneDate)) || void 0
+      (listItem?.doneDate && new Date(listItem.doneDate)) ||
+      (this.#type === ListItemType.Done && new Date()) ||
+      void 0
     this.#withoutDate = withoutDate
   }
 
