@@ -1,39 +1,34 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { AppThunk } from '~/app/store'
-import { signInByEmail } from '~/common/api/firebaseAPI'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { signInByEmail, User } from '~/common/api/firebaseAPI'
 
-interface User {
+interface SignInByEmail {
   email: string
   password: string
 }
 
 type UserState = {
-  user: User
+  singInByEmail?: SignInByEmail
+  user?: User
 }
 
-const initialState: UserState = {
-  user: {
-    email: '',
-    password: '',
-  },
-}
+const initialState: UserState = {}
+
+export const fetchUser = createAsyncThunk(
+  'user/fetchUser',
+  async (signIn: SignInByEmail) => {
+    return await signInByEmail(signIn.email, signIn.password)
+  }
+)
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {
-    signIn(state, action: PayloadAction<User>) {},
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchUser.fulfilled, (state, action) => {
+      state.user = action.payload
+    })
   },
 })
 
-export const { signIn } = userSlice.actions
-
 export default userSlice.reducer
-
-export const fetchUser = (user: User): AppThunk => async (dispatch) => {
-  try {
-    await signInByEmail(user.email, user.password)
-  } catch (err) {
-    console.log(err)
-  }
-}

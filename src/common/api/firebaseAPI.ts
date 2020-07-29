@@ -15,7 +15,8 @@ const app = firebase.initializeApp({
 const store = firebase.firestore(app)
 
 export interface User {
-  [key: string]: any
+  id: string
+  email?: string
 }
 
 export interface ListItem {
@@ -24,6 +25,7 @@ export interface ListItem {
   readingTarget: string
   type: ListItemType
   book: Book
+  userId: string
 }
 
 export interface Book {
@@ -63,7 +65,7 @@ export enum ListItemType {
 export async function signInByEmail(
   email: string,
   password: string
-): Promise<User | null> {
+): Promise<User | undefined> {
   const response = await app.auth().signInWithEmailAndPassword(email, password)
   if (response.user) {
     const userResponse = await store
@@ -71,10 +73,14 @@ export async function signInByEmail(
       .where('id', '==', response.user.uid)
       .get()
     if (!userResponse.empty) {
-      return userResponse.docs[0].ref
+      const userDoc = userResponse.docs[0]
+      return {
+        id: userDoc.id,
+        email: userDoc.data().email,
+      }
     }
   }
-  return null
+  return void 0
 }
 
 export async function getBookFromList(listId: string): Promise<ListItem> {
@@ -88,7 +94,10 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   const genres = await fetchCollections<Genre>(bookData.genres)
   const tags = await fetchCollections<Tag>(bookData.tags)
 
+  const userDoc = await listData?.userId.get()
+
   return {
+    userId: userDoc.id,
     id: listDoc.id,
     doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
     readingTarget: listData?.readingTarget,
@@ -110,12 +119,108 @@ export async function searchAuthors(needle: string): Promise<Author[]> {
   return searchInCollection<Author>(needle, 'authors')
 }
 
-export function searchGenres(needle: string): Promise<Genre[]> {
+export async function searchGenres(needle: string): Promise<Genre[]> {
   return searchInCollection<Genre>(needle, 'genres', 'name')
 }
 
-export function searchTags(needle: string): Promise<Tag[]> {
+export async function searchTags(needle: string): Promise<Tag[]> {
   return searchInCollection<Genre>(needle, 'tags', 'name')
+}
+
+export async function setBookList(listItem: ListItem): Promise<void> {
+  const batch = store.batch()
+
+  const tags = batchCollection(batch, listItem.book.tags, 'tags', (tag) => ({
+    name: tag.name,
+  }))
+
+  const genres = batchCollection(
+    batch,
+    listItem.book.genres,
+    'genres',
+    (genre) => ({
+      name: genre.name,
+    })
+  )
+
+  const authors = batchCollection(
+    batch,
+    listItem.book.authors,
+    'authors',
+    (author) => ({
+      name: author.name,
+      search: author.search,
+    })
+  )
+
+  const bookRef = getDocID(listItem.book.id, 'books')
+  batch.set(
+    bookRef,
+    {
+      tags,
+      genres,
+      authors,
+      name: listItem.book.name,
+      search: listItem.book.name.toLocaleLowerCase(),
+      description: listItem.book.description,
+      year: listItem.book.year,
+      edition: listItem.book.edition,
+    },
+    { merge: true }
+  )
+
+  batch.set(
+    getDocID(listItem.id, 'lists'),
+    {
+      doneDate: listItem.doneDate ?? null,
+      readingTarget: listItem.readingTarget,
+      type: listItem.type,
+      bookId: bookRef,
+      userId: getDocID(listItem.userId, 'users'),
+    },
+    { merge: true }
+  )
+
+  await batch.commit()
+}
+
+function batchCollection<T extends ID>(
+  batch: firebase.firestore.WriteBatch,
+  collection: T[],
+  collectionPath: string,
+  onData: (item: T) => Omit<T, 'id'>
+): firebase.firestore.DocumentReference[] {
+  const refs: firebase.firestore.DocumentReference[] = []
+  replaceEmptyIDs<T>(collection, collectionPath).forEach((item) => {
+    const ref = store.collection(collectionPath).doc(item.id)
+    batch.set(ref, onData(item), {
+      merge: true,
+    })
+    refs.push(ref)
+  })
+  return refs
+}
+
+function getDocID(
+  id: string,
+  collectionPath: string
+): firebase.firestore.DocumentReference {
+  return id
+    ? store.collection(collectionPath).doc(id)
+    : store.collection(collectionPath).doc()
+}
+
+function replaceEmptyIDs<T extends ID>(
+  collection: T[],
+  collectionPath: string
+): T[] {
+  const nextCollection: T[] = []
+  for (const key in collection) {
+    const item = collection[key]
+    const itemRef = getDocID(item.id, collectionPath)
+    nextCollection[key] = { ...item, id: itemRef.id }
+  }
+  return nextCollection
 }
 
 async function fetchCollections<T extends ID>(

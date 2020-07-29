@@ -15,6 +15,7 @@ class BookDetailsForm {
   static READING_TARGET_MAX_LENGTH = 250
 
   readonly #id: string
+  readonly #userId: string
   readonly #book: BookField
 
   #type: ListItemType
@@ -25,6 +26,7 @@ class BookDetailsForm {
 
   constructor(listItem?: ListItem, withoutDate = false) {
     this.#id = listItem?.id || ''
+    this.#userId = listItem?.userId || ''
     this.#book = new BookField(listItem?.book)
     this.#type = listItem?.type || ListItemType.Done
     this.#readingTarget = listItem?.readingTarget || ''
@@ -80,6 +82,7 @@ class BookDetailsForm {
   clone() {
     return new BookDetailsForm(
       {
+        userId: this.#userId,
         id: this.#id,
         doneDate: this.doneDate?.getTime(),
         readingTarget: this.#readingTarget,
@@ -90,10 +93,11 @@ class BookDetailsForm {
     )
   }
 
-  toObject() {
+  toObject(): ListItem {
     return {
+      userId: this.#userId,
       id: this.#id,
-      doneDate: !this.#withoutDate ? this.doneDate?.getTime() : null,
+      doneDate: !this.#withoutDate ? this.doneDate?.getTime() : undefined,
       readingTarget: this.#readingTarget,
       type: this.#type,
       book: this.#book.toObject(),

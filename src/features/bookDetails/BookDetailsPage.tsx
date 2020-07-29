@@ -35,6 +35,7 @@ import {
   findTags,
   findBooks,
   selectBookNames,
+  setBookList,
 } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
 import coverImage from './undraw_book_lover_mkck.svg'
@@ -206,7 +207,7 @@ const BookDetailsPage = () => {
   )
 
   const handleCancel = () => dispatch(redirect('/'))
-
+  // TODO Empty done date
   const handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0]
@@ -227,7 +228,7 @@ const BookDetailsPage = () => {
   }
 
   const handleSave = () => {
-    console.log(details.toObject())
+    dispatch(setBookList(details.toObject()))
   }
 
   return (

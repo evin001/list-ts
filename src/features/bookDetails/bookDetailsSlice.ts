@@ -10,6 +10,7 @@ import {
   searchBooks,
   searchGenres,
   searchTags,
+  setBookList as setBookListAPI,
   ListItem,
   Author,
   Genre,
@@ -76,6 +77,13 @@ export const findBooks = createAsyncThunk(
   }
 )
 
+export const setBookList = createAsyncThunk(
+  `${thunkPrefix}/setBookList`,
+  async (listItem: ListItem) => {
+    await setBookListAPI(listItem)
+  }
+)
+
 const bookDetailsSlice = createSlice({
   name: 'bookDetails',
   initialState,
@@ -90,11 +98,19 @@ const bookDetailsSlice = createSlice({
       })
     }
 
+    function errorStub(method: ActionCreatorWithPreparedPayload<any, any>) {
+      builder.addCase(method, (state, action) => {
+        console.log({ action })
+      })
+    }
+
     setField(fetchBook.fulfilled, 'listItem')
     setField(findAuthors.fulfilled, 'filteredAuthors')
     setField(findGenres.fulfilled, 'filteredGenres')
     setField(findTags.fulfilled, 'filteredTags')
     setField(findBooks.fulfilled, 'filteredBooks')
+
+    errorStub(setBookList.rejected)
 
     builder.addCase(fetchBook.rejected, (state, action) => {
       // TODO Redirect to not found page
