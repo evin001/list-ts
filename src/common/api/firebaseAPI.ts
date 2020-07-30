@@ -1,18 +1,20 @@
 import * as firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
+import 'firebase/storage'
 
 const app = firebase.initializeApp({
   apiKey: FIREBASE.apiKey,
   authDomain: `${FIREBASE.projectId}.firebaseapp.com`,
   //databaseURL: `https://${FIREBASE.projectId}.firebaseio.com`,
   projectId: FIREBASE.projectId,
-  //storageBucket: `${FIREBASE.projectId}.appspot.com`,
+  storageBucket: `${FIREBASE.projectId}.appspot.com`,
   //messagingSenderId: FIREBASE.messagingSenderId,
   //appId: FIREBASE.appId,
 })
 
 const store = firebase.firestore(app)
+const storage = firebase.storage(app)
 
 export interface User {
   id: string

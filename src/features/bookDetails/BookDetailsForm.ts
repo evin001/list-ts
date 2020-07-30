@@ -35,6 +35,31 @@ class BookDetailsForm {
     this.#withoutDate = withoutDate || !this.#doneDate
   }
 
+  clone() {
+    return new BookDetailsForm(
+      {
+        userId: this.#userId,
+        id: this.#id,
+        doneDate: this.#doneDate?.getTime(),
+        readingTarget: this.#readingTarget,
+        type: this.#type,
+        book: this.#book.toObject(),
+      },
+      this.#withoutDate
+    )
+  }
+
+  toObject(): ListItem {
+    return {
+      userId: this.#userId,
+      id: this.#id,
+      doneDate: !this.#withoutDate ? this.#doneDate?.getTime() : undefined,
+      readingTarget: this.#readingTarget,
+      type: this.#type,
+      book: this.#book.toObject(),
+    }
+  }
+
   get hasError(): boolean {
     return this.#book.hasError
   }
@@ -85,31 +110,6 @@ class BookDetailsForm {
       BookDetailsForm.READING_TARGET_MAX_LENGTH
     }`
   }
-
-  clone() {
-    return new BookDetailsForm(
-      {
-        userId: this.#userId,
-        id: this.#id,
-        doneDate: this.#doneDate?.getTime(),
-        readingTarget: this.#readingTarget,
-        type: this.#type,
-        book: this.#book.toObject(),
-      },
-      this.#withoutDate
-    )
-  }
-
-  toObject(): ListItem {
-    return {
-      userId: this.#userId,
-      id: this.#id,
-      doneDate: !this.#withoutDate ? this.#doneDate?.getTime() : undefined,
-      readingTarget: this.#readingTarget,
-      type: this.#type,
-      book: this.#book.toObject(),
-    }
-  }
 }
 
 class BookField {
@@ -139,6 +139,19 @@ class BookField {
     this.#authors = book?.authors || []
     this.#genres = book?.genres || []
     this.#tags = book?.tags || []
+  }
+
+  toObject(): Book {
+    return {
+      id: this.#id,
+      name: this.#name,
+      description: this.#description,
+      year: this.#year,
+      edition: this.#edition,
+      authors: this.#authors,
+      genres: this.#genres,
+      tags: this.#tags,
+    }
   }
 
   get hasError(): boolean {
@@ -238,19 +251,6 @@ class BookField {
 
   get helpTextTags() {
     return `${this.#tags.length}/${BookField.TAGS_MAX_COUNT}`
-  }
-
-  toObject(): Book {
-    return {
-      id: this.#id,
-      name: this.#name,
-      description: this.#description,
-      year: this.#year,
-      edition: this.#edition,
-      authors: this.#authors,
-      genres: this.#genres,
-      tags: this.#tags,
-    }
   }
 }
 

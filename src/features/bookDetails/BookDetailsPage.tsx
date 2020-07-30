@@ -16,7 +16,7 @@ import { AsyncThunkAction } from '@reduxjs/toolkit'
 import { useDidMount } from 'beautiful-react-hooks'
 import ruLocale from 'date-fns/locale/ru'
 import debounce from 'lodash/debounce'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
@@ -38,7 +38,9 @@ import {
   setBookList,
 } from './bookDetailsSlice'
 import { listItemTypes } from './constants'
-import coverImage from './undraw_book_lover_mkck.svg'
+import coverPlaceholderImage from './undraw_book_lover_mkck.svg'
+
+const COVER_SIZE_LIMIT = 512 // Kilobytes
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -56,7 +58,8 @@ const useStyles = makeStyles(
       },
     },
     cover: {
-      marginTop: theme.spacing(1),
+      marginLeft: theme.spacing(3),
+      textAlign: 'center',
       '& input': {
         display: 'none',
       },
@@ -68,7 +71,7 @@ const useStyles = makeStyles(
       width: '160px',
       height: '230px',
       padding: '3px',
-      marginLeft: '25px',
+      marginBottom: theme.spacing(1),
       '& img': {
         width: '100%',
         height: 'auto',
@@ -114,6 +117,9 @@ const BookDetailsPage = () => {
   )
 
   const [details, setDetails] = useState<BookDetailsForm>(new BookDetailsForm())
+  const [cover, setCover] = useState<File | null>(null)
+  const imagePreview = useRef<HTMLImageElement>(null)
+  const coverInput = useRef<HTMLInputElement>(null)
 
   useDidMount(() => {
     if (id) {
@@ -209,13 +215,27 @@ const BookDetailsPage = () => {
   )
 
   const handleCancel = () => dispatch(redirect('/'))
-  // TODO Empty done date
+
+  const resetCover = () => {
+    if (coverInput.current) {
+      coverInput.current.value = ''
+    }
+  }
+
   const handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0]
-      // const sizeMb = file.size / (1024 * 1024)
-      const image = document.getElementById('cover') as HTMLImageElement
-      if (image) {
+      if (!file) return resetCover()
+
+      const sizeKb = file.size / 1024
+      if (sizeKb > COVER_SIZE_LIMIT) {
+        alert(`Максимальный размер файла ${COVER_SIZE_LIMIT} Кб`)
+        return resetCover()
+      }
+
+      setCover(file)
+
+      if (imagePreview.current) {
         const reader = new FileReader()
         reader.onload = (function (aImg: HTMLImageElement) {
           return function (e: ProgressEvent<FileReader>) {
@@ -223,7 +243,7 @@ const BookDetailsPage = () => {
               aImg.src = e.target.result as string
             }
           }
-        })(image)
+        })(imagePreview.current)
         reader.readAsDataURL(file)
       }
     }
@@ -364,23 +384,24 @@ const BookDetailsPage = () => {
           helperText={details.book.helpTextDescription}
           onChange={handleChangeBook}
         />
-        <Paper className={classes.coverImage}>
-          <img id="cover" src={coverImage} alt="Обложка" />
-        </Paper>
-      </Box>
-      <Box className={classes.cover}>
-        <input
-          accept=".jpg, .jpeg, .png"
-          className={classes.cover}
-          id="contained-cover-file"
-          type="file"
-          onChange={handleChangeFile}
-        />
-        <label htmlFor="contained-cover-file">
-          <Button variant="contained" color="primary" component="span">
-            Обложка
-          </Button>
-        </label>
+        <Box className={classes.cover}>
+          <Paper className={classes.coverImage}>
+            <img src={coverPlaceholderImage} alt="Обложка" ref={imagePreview} />
+          </Paper>
+          <input
+            ref={coverInput}
+            accept=".jpg, .jpeg, .png"
+            className={classes.cover}
+            id="contained-cover-file"
+            type="file"
+            onChange={handleChangeFile}
+          />
+          <label htmlFor="contained-cover-file">
+            <Button variant="contained" color="primary" component="span">
+              Обложка
+            </Button>
+          </label>
+        </Box>
       </Box>
       {details.type === ListItemType.Done && (
         <React.Fragment>

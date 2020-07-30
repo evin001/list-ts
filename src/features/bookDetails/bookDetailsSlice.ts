@@ -87,10 +87,10 @@ export const setBookList = createAsyncThunk(
     try {
       dispatch(loading())
       await setBookListAPI(listItem)
-      dispatch(success('Данные обновлены'))
+      dispatch(success(listItem.id ? 'Книга обновлена' : 'Книга добавлена'))
       dispatch(redirect('/'))
     } catch (e) {
-      dispatch(error('Не удалось обновить данные'))
+      dispatch(error('Не удалось обновить книгу'))
     } finally {
       dispatch(loaded())
     }
