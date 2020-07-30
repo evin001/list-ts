@@ -172,7 +172,9 @@ export async function setBookList(listItem: ListItem): Promise<void> {
   batch.set(
     getDocID(listItem.id, 'lists'),
     {
-      doneDate: listItem.doneDate ?? null,
+      doneDate: listItem.doneDate
+        ? firebase.firestore.Timestamp.fromMillis(listItem.doneDate)
+        : null,
       readingTarget: listItem.readingTarget,
       type: listItem.type,
       bookId: bookRef,

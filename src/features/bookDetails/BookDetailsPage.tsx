@@ -93,6 +93,7 @@ const BookDetailsPage = () => {
   const dispatch = useDispatch()
   const { id } = useParams()
   const {
+    user,
     listItem,
     filteredGenres,
     filteredTags,
@@ -101,6 +102,7 @@ const BookDetailsPage = () => {
     filteredBookNames,
   } = useSelector(
     (state: RootState) => ({
+      user: state.user.user,
       listItem: state.bookDetails.listItem,
       filteredAuthors: state.bookDetails.filteredAuthors,
       filteredGenres: state.bookDetails.filteredGenres,
@@ -228,7 +230,9 @@ const BookDetailsPage = () => {
   }
 
   const handleSave = () => {
-    dispatch(setBookList(details.toObject()))
+    if (user) {
+      dispatch(setBookList({ ...details.toObject(), userId: user.id }))
+    }
   }
 
   return (

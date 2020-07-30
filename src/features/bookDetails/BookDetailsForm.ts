@@ -22,7 +22,7 @@ class BookDetailsForm {
   #readingTarget: string
   #withoutDate: boolean
 
-  doneDate?: Date
+  #doneDate?: Date
 
   constructor(listItem?: ListItem, withoutDate = false) {
     this.#id = listItem?.id || ''
@@ -30,11 +30,9 @@ class BookDetailsForm {
     this.#book = new BookField(listItem?.book)
     this.#type = listItem?.type || ListItemType.Done
     this.#readingTarget = listItem?.readingTarget || ''
-    this.doneDate =
-      (listItem?.doneDate && new Date(listItem.doneDate)) ||
-      (this.#type === ListItemType.Done && new Date()) ||
-      void 0
-    this.#withoutDate = withoutDate
+    this.#doneDate =
+      (listItem?.doneDate && new Date(listItem.doneDate)) || void 0
+    this.#withoutDate = withoutDate || !this.#doneDate
   }
 
   get hasError(): boolean {
@@ -46,8 +44,17 @@ class BookDetailsForm {
   }
 
   set type(value) {
-    this.doneDate = value !== ListItemType.Done ? void 0 : new Date()
+    this.#doneDate = value !== ListItemType.Done ? void 0 : new Date()
     this.#type = value
+  }
+
+  get doneDate() {
+    return this.#doneDate
+  }
+
+  set doneDate(value) {
+    this.#doneDate = value
+    this.#withoutDate = false
   }
 
   get withoutDate() {
@@ -84,7 +91,7 @@ class BookDetailsForm {
       {
         userId: this.#userId,
         id: this.#id,
-        doneDate: this.doneDate?.getTime(),
+        doneDate: this.#doneDate?.getTime(),
         readingTarget: this.#readingTarget,
         type: this.#type,
         book: this.#book.toObject(),
@@ -97,7 +104,7 @@ class BookDetailsForm {
     return {
       userId: this.#userId,
       id: this.#id,
-      doneDate: !this.#withoutDate ? this.doneDate?.getTime() : undefined,
+      doneDate: !this.#withoutDate ? this.#doneDate?.getTime() : undefined,
       readingTarget: this.#readingTarget,
       type: this.#type,
       book: this.#book.toObject(),

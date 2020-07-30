@@ -81,6 +81,7 @@ export const setBookList = createAsyncThunk(
   `${thunkPrefix}/setBookList`,
   async (listItem: ListItem) => {
     await setBookListAPI(listItem)
+    console.log('update')
   }
 )
 
