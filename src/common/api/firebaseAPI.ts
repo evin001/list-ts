@@ -141,6 +141,9 @@ export async function setBookList(
   cover: File | null
 ): Promise<void> {
   if (cover) {
+    if (listItem.book.cover) {
+      await storage.refFromURL(listItem.book.cover).delete()
+    }
     const coverRef = storage.ref().child(cover.name)
     await coverRef.put(cover)
   }
