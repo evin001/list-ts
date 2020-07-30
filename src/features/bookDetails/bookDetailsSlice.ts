@@ -18,6 +18,8 @@ import {
   FilteredBook,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
+import { redirect } from '~/features/location/locationSlice'
+import { success, error } from '~/features/notification/notificationSlice'
 
 interface BookDetailsState {
   listItem?: ListItem
@@ -43,6 +45,8 @@ export const fetchBook = createAsyncThunk(
     try {
       dispatch(loading())
       return await getBookFromList(listId)
+    } catch (e) {
+      dispatch(error('Не удалось загрузить данные'))
     } finally {
       dispatch(loaded())
     }
@@ -79,9 +83,17 @@ export const findBooks = createAsyncThunk(
 
 export const setBookList = createAsyncThunk(
   `${thunkPrefix}/setBookList`,
-  async (listItem: ListItem) => {
-    await setBookListAPI(listItem)
-    console.log('update')
+  async (listItem: ListItem, { dispatch }) => {
+    try {
+      dispatch(loading())
+      await setBookListAPI(listItem)
+      dispatch(success('Данные обновлены'))
+      dispatch(redirect('/'))
+    } catch (e) {
+      dispatch(error('Не удалось обновить данные'))
+    } finally {
+      dispatch(loaded())
+    }
   }
 )
 

@@ -6,6 +6,7 @@ import React, { Fragment } from 'react'
 import { useDispatch } from 'react-redux'
 import Header from '~/common/components/Header'
 import LinearProgress from '~/common/components/LinearProgress'
+import Notification from '~/common/components/Notification'
 import { fetchUser } from '~/features/user/userSlice'
 import Routes from './Routes'
 
@@ -31,6 +32,7 @@ const AppWrapper = ({ classes }: Props) => {
       <Container maxWidth="md" className={classes.root}>
         <Header />
         <LinearProgress />
+        <Notification />
         <Routes />
       </Container>
     </Fragment>
