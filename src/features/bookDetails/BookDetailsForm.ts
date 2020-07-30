@@ -7,7 +7,10 @@ import {
   ListItemType,
 } from '~/common/api/firebaseAPI'
 
-export type BookType = keyof Omit<Book, 'id' | 'authors' | 'genres' | 'tags'>
+export type BookType = keyof Omit<
+  Book,
+  'id' | 'cover' | 'authors' | 'genres' | 'tags'
+>
 export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
 export type AutocompleteBookType = 'authors' | 'genres' | 'tags'
 
@@ -121,6 +124,7 @@ class BookField {
   static TAGS_MAX_COUNT = 10
 
   readonly #id: string
+  readonly #cover: string
 
   #name: string
   #description: string
@@ -132,6 +136,7 @@ class BookField {
 
   constructor(book?: Book) {
     this.#id = book?.id || ''
+    this.#cover = book?.cover || ''
     this.#name = book?.name ?? ''
     this.#description = book?.description ?? ''
     this.#year = book?.year ?? ''
@@ -144,6 +149,7 @@ class BookField {
   toObject(): Book {
     return {
       id: this.#id,
+      cover: this.#cover,
       name: this.#name,
       description: this.#description,
       year: this.#year,
@@ -163,6 +169,10 @@ class BookField {
       this.#name === '' ||
       this.#description === ''
     )
+  }
+
+  get cover() {
+    return this.#cover
   }
 
   get name() {

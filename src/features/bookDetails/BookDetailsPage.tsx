@@ -251,7 +251,12 @@ const BookDetailsPage = () => {
 
   const handleSave = () => {
     if (user) {
-      dispatch(setBookList({ ...details.toObject(), userId: user.id }))
+      dispatch(
+        setBookList({
+          listItem: { ...details.toObject(), userId: user.id },
+          cover,
+        })
+      )
     }
   }
 
@@ -386,7 +391,11 @@ const BookDetailsPage = () => {
         />
         <Box className={classes.cover}>
           <Paper className={classes.coverImage}>
-            <img src={coverPlaceholderImage} alt="Обложка" ref={imagePreview} />
+            <img
+              ref={imagePreview}
+              src={details.book.cover || coverPlaceholderImage}
+              alt="Обложка"
+            />
           </Paper>
           <input
             ref={coverInput}

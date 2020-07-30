@@ -36,6 +36,7 @@ export interface Book {
   name: string
   year: string
   edition: string
+  cover: string
   authors: Author[]
   genres: Genre[]
   tags: Tag[]
@@ -98,6 +99,11 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
 
   const userDoc = await listData?.userId.get()
 
+  let coverUrl = ''
+  if (bookData.cover) {
+    coverUrl = await storage.ref().child(bookData.cover).getDownloadURL()
+  }
+
   return {
     userId: userDoc.id,
     id: listDoc.id,
@@ -113,6 +119,7 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       authors,
       genres,
       tags,
+      cover: coverUrl,
     },
   }
 }
@@ -129,7 +136,15 @@ export async function searchTags(needle: string): Promise<Tag[]> {
   return searchInCollection<Genre>(needle, 'tags', 'name')
 }
 
-export async function setBookList(listItem: ListItem): Promise<void> {
+export async function setBookList(
+  listItem: ListItem,
+  cover: File | null
+): Promise<void> {
+  if (cover) {
+    const coverRef = storage.ref().child(cover.name)
+    await coverRef.put(cover)
+  }
+
   const batch = store.batch()
 
   const tags = batchCollection(batch, listItem.book.tags, 'tags', (tag) => ({
@@ -167,6 +182,7 @@ export async function setBookList(listItem: ListItem): Promise<void> {
       description: listItem.book.description,
       year: listItem.book.year,
       edition: listItem.book.edition,
+      ...(cover ? { cover: cover.name } : {}),
     },
     { merge: true }
   )
@@ -296,5 +312,6 @@ export async function searchBooks(
     description: bookDoc.data().description,
     year: bookDoc.data().year,
     edition: bookDoc.data().edition,
+    cover: bookDoc.data().cover,
   }))
 }

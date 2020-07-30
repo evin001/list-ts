@@ -83,10 +83,11 @@ export const findBooks = createAsyncThunk(
 
 export const setBookList = createAsyncThunk(
   `${thunkPrefix}/setBookList`,
-  async (listItem: ListItem, { dispatch }) => {
+  async (args: { listItem: ListItem; cover: File | null }, { dispatch }) => {
     try {
+      const { listItem, cover } = args
       dispatch(loading())
-      await setBookListAPI(listItem)
+      await setBookListAPI(listItem, cover)
       dispatch(success(listItem.id ? 'Книга обновлена' : 'Книга добавлена'))
       dispatch(redirect('/'))
     } catch (e) {
