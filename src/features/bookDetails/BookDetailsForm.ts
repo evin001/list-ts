@@ -132,6 +132,7 @@ class BookField {
   #description: string
   #year: string
   #edition: string
+  #numberInSeries: string
   #authors: Author[]
   #genres: Genre[]
   #tags: Tag[]
@@ -144,6 +145,7 @@ class BookField {
     this.#description = book?.description ?? ''
     this.#year = book?.year ?? ''
     this.#edition = book?.edition ?? ''
+    this.#numberInSeries = book?.numberInSeries ?? ''
     this.#authors = book?.authors || []
     this.#genres = book?.genres || []
     this.#tags = book?.tags || []
@@ -158,6 +160,7 @@ class BookField {
       description: this.#description,
       year: this.#year,
       edition: this.#edition,
+      numberInSeries: this.#numberInSeries,
       authors: this.#authors,
       genres: this.#genres,
       tags: this.#tags,
@@ -168,7 +171,8 @@ class BookField {
   get hasError(): boolean {
     return (
       this.#year === '' ||
-      this.#year === '0' ||
+      (this.#year && parseInt(this.#year, 10) <= 0) ||
+      (this.#numberInSeries && parseInt(this.#numberInSeries, 10) <= 0) ||
       this.#genres.length === 0 ||
       this.#authors.length === 0 ||
       this.#name === '' ||
@@ -210,6 +214,14 @@ class BookField {
 
   set year(value) {
     this.#year = value
+  }
+
+  get numberInSeries() {
+    return this.#numberInSeries
+  }
+
+  set numberInSeries(value) {
+    this.#numberInSeries = value
   }
 
   get edition() {
@@ -295,8 +307,8 @@ function setFilteredField<T>(
       if (typeof item === 'string') {
         return ({
           id: '',
-          name: search ? item : item.toLocaleLowerCase(),
-          ...(search ? { search: item.toLocaleLowerCase() } : {}),
+          name: search ? item.trim() : item.toLocaleLowerCase().trim(),
+          ...(search ? { search: item.toLocaleLowerCase().trim() } : {}),
         } as unknown) as T
       }
       return item

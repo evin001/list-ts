@@ -37,6 +37,7 @@ export interface Book {
   year: string
   edition: string
   cover: string
+  numberInSeries: string
   authors: Author[]
   genres: Genre[]
   tags: Tag[]
@@ -122,6 +123,7 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       description: bookData.description,
       year: bookData.year,
       edition: bookData.edition,
+      numberInSeries: bookData.numberInSeries,
       authors,
       genres,
       tags,
@@ -206,6 +208,7 @@ export async function setBookList(
       description: listItem.book.description,
       year: listItem.book.year,
       edition: listItem.book.edition,
+      numberInSeries: listItem.book.numberInSeries,
       ...(cover ? { cover: cover.name } : {}),
     },
     { merge: true }
@@ -336,6 +339,7 @@ export async function searchBooks(
     description: bookDoc.data().description,
     year: bookDoc.data().year,
     edition: bookDoc.data().edition,
+    numberInSeries: bookDoc.data().numberInSeries,
     cover: bookDoc.data().cover,
   }))
 }

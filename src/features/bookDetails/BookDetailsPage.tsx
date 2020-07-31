@@ -111,16 +111,18 @@ const BookDetailsPage = () => {
     filteredAuthors,
     filteredBooks,
     filteredBookNames,
+    loading,
   } = useSelector(
-    (state: RootState) => ({
-      user: state.user.user,
-      listItem: state.bookDetails.listItem,
-      filteredAuthors: state.bookDetails.filteredAuthors,
-      filteredGenres: state.bookDetails.filteredGenres,
-      filteredTags: state.bookDetails.filteredTags,
-      filteredSeries: state.bookDetails.filteredSeries,
-      filteredBooks: state.bookDetails.filteredBooks,
-      filteredBookNames: selectBookNames(state.bookDetails),
+    (store: RootState) => ({
+      user: store.user.user,
+      listItem: store.bookDetails.listItem,
+      filteredAuthors: store.bookDetails.filteredAuthors,
+      filteredGenres: store.bookDetails.filteredGenres,
+      filteredTags: store.bookDetails.filteredTags,
+      filteredSeries: store.bookDetails.filteredSeries,
+      filteredBooks: store.bookDetails.filteredBooks,
+      filteredBookNames: selectBookNames(store.bookDetails),
+      loading: store.loader.loading,
     }),
     shallowEqual
   )
@@ -363,6 +365,16 @@ const BookDetailsPage = () => {
           multiple
           freeSolo
         />
+        <TextField
+          id="numberInSeries"
+          label="Номер в серии"
+          margin="normal"
+          required
+          fullWidth
+          type="number"
+          value={details.book.numberInSeries}
+          onChange={handleChangeBook}
+        />
       </Box>
       <Box>
         <Autocomplete
@@ -492,7 +504,7 @@ const BookDetailsPage = () => {
         <Button
           variant="contained"
           color="primary"
-          disabled={details.hasError}
+          disabled={details.hasError || loading}
           onClick={handleSave}
         >
           {id ? 'Обновить' : 'Создать'}
