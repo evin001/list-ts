@@ -29,6 +29,9 @@ const bookListSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    builder.addCase(fetchUserBooks.pending, (state) => {
+      state.shortItemList = []
+    })
     builder.addCase(fetchUserBooks.fulfilled, (state, action) => {
       state.shortItemList = action.payload
     })

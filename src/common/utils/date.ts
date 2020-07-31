@@ -10,3 +10,7 @@ export class RuLocalizedUtils extends DateFnsUtils {
     return format(date, 'dd MMMM', { locale: this.locale })
   }
 }
+
+export function humanDate(date: number) {
+  return format(date, 'dd.MM.yyyy')
+}

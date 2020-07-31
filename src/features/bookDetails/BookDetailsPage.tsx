@@ -369,7 +369,6 @@ const BookDetailsPage = () => {
           id="numberInSeries"
           label="Номер в серии"
           margin="normal"
-          required
           fullWidth
           type="number"
           value={details.book.numberInSeries}
