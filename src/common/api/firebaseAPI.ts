@@ -40,6 +40,7 @@ export interface Book {
   authors: Author[]
   genres: Genre[]
   tags: Tag[]
+  series: Series[]
 }
 
 export interface Author extends ID {
@@ -55,9 +56,13 @@ export interface Tag extends ID {
   name: string
 }
 
+export interface Series extends ID {
+  name: string
+}
+
 export type ID = { id: string }
 
-export type FilteredBook = Omit<Book, 'authors' | 'genres' | 'tags'>
+export type FilteredBook = Omit<Book, 'authors' | 'genres' | 'tags' | 'series'>
 
 export enum ListItemType {
   Done = 'done',
@@ -96,6 +101,7 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   const authors = await fetchCollections<Author>(bookData.authors)
   const genres = await fetchCollections<Genre>(bookData.genres)
   const tags = await fetchCollections<Tag>(bookData.tags)
+  const series = await fetchCollections<Series>(bookData.series)
 
   const userDoc = await listData?.userId.get()
 
@@ -119,21 +125,26 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       authors,
       genres,
       tags,
+      series,
       cover: coverUrl,
     },
   }
 }
 
 export async function searchAuthors(needle: string): Promise<Author[]> {
-  return searchInCollection<Author>(needle, 'authors')
+  return searchInCollection(needle, 'authors')
 }
 
 export async function searchGenres(needle: string): Promise<Genre[]> {
-  return searchInCollection<Genre>(needle, 'genres', 'name')
+  return searchInCollection(needle, 'genres', 'name')
 }
 
 export async function searchTags(needle: string): Promise<Tag[]> {
-  return searchInCollection<Genre>(needle, 'tags', 'name')
+  return searchInCollection(needle, 'tags', 'name')
+}
+
+export async function searchSeries(needle: string): Promise<Series[]> {
+  return searchInCollection(needle, 'series', 'name')
 }
 
 export async function setBookList(
@@ -153,6 +164,15 @@ export async function setBookList(
   const tags = batchCollection(batch, listItem.book.tags, 'tags', (tag) => ({
     name: tag.name,
   }))
+
+  const series = batchCollection(
+    batch,
+    listItem.book.series,
+    'series',
+    (series) => ({
+      name: series.name,
+    })
+  )
 
   const genres = batchCollection(
     batch,
@@ -178,6 +198,7 @@ export async function setBookList(
     bookRef,
     {
       tags,
+      series,
       genres,
       authors,
       name: listItem.book.name,

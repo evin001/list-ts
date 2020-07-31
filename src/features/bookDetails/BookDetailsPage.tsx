@@ -20,7 +20,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
-import { Author, Genre, Tag, ListItemType } from '~/common/api/firebaseAPI'
+import {
+  Author,
+  Genre,
+  Tag,
+  Series,
+  ListItemType,
+} from '~/common/api/firebaseAPI'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
 import BookDetailsForm, {
@@ -33,6 +39,7 @@ import {
   findAuthors,
   findGenres,
   findTags,
+  findSeries,
   findBooks,
   selectBookNames,
   setBookList,
@@ -100,6 +107,7 @@ const BookDetailsPage = () => {
     listItem,
     filteredGenres,
     filteredTags,
+    filteredSeries,
     filteredAuthors,
     filteredBooks,
     filteredBookNames,
@@ -110,6 +118,7 @@ const BookDetailsPage = () => {
       filteredAuthors: state.bookDetails.filteredAuthors,
       filteredGenres: state.bookDetails.filteredGenres,
       filteredTags: state.bookDetails.filteredTags,
+      filteredSeries: state.bookDetails.filteredSeries,
       filteredBooks: state.bookDetails.filteredBooks,
       filteredBookNames: selectBookNames(state.bookDetails),
     }),
@@ -331,6 +340,26 @@ const BookDetailsPage = () => {
           getOptionSelected={(option, value) => option.id === value.id}
           onChange={handleChangeAutocomplete('tags')}
           onInputChange={handleChangeAutocompleteInput(findTags)}
+          multiple
+          freeSolo
+        />
+      </Box>
+      <Box>
+        <Autocomplete
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Серия"
+              margin="normal"
+              helperText={details.book.helpTextSeries}
+            />
+          )}
+          options={filteredSeries}
+          getOptionLabel={(option: Series) => option.name}
+          value={details.book.series}
+          getOptionSelected={(option, value) => option.id === value.id}
+          onChange={handleChangeAutocomplete('series')}
+          onInputChange={handleChangeAutocompleteInput(findSeries)}
           multiple
           freeSolo
         />

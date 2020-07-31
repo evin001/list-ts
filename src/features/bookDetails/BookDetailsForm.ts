@@ -3,16 +3,17 @@ import {
   Book,
   Genre,
   Tag,
+  Series,
   ListItem,
   ListItemType,
 } from '~/common/api/firebaseAPI'
 
 export type BookType = keyof Omit<
   Book,
-  'id' | 'cover' | 'authors' | 'genres' | 'tags'
+  'id' | 'cover' | 'authors' | 'genres' | 'tags' | 'series'
 >
 export type BookDetailsType = keyof Pick<ListItem, 'readingTarget'>
-export type AutocompleteBookType = 'authors' | 'genres' | 'tags'
+export type AutocompleteBookType = 'authors' | 'genres' | 'tags' | 'series'
 
 class BookDetailsForm {
   static READING_TARGET_MAX_LENGTH = 250
@@ -122,6 +123,7 @@ class BookField {
   static AUTHORS_MAX_COUNT = 5
   static GENRES_MAX_COUNT = 10
   static TAGS_MAX_COUNT = 10
+  static SERIES_MAX_COUNT = 3
 
   readonly #id: string
   readonly #cover: string
@@ -133,6 +135,7 @@ class BookField {
   #authors: Author[]
   #genres: Genre[]
   #tags: Tag[]
+  #series: Series[]
 
   constructor(book?: Book) {
     this.#id = book?.id || ''
@@ -144,6 +147,7 @@ class BookField {
     this.#authors = book?.authors || []
     this.#genres = book?.genres || []
     this.#tags = book?.tags || []
+    this.#series = book?.series || []
   }
 
   toObject(): Book {
@@ -157,6 +161,7 @@ class BookField {
       authors: this.#authors,
       genres: this.#genres,
       tags: this.#tags,
+      series: this.#series,
     }
   }
 
@@ -261,6 +266,22 @@ class BookField {
 
   get helpTextTags() {
     return `${this.#tags.length}/${BookField.TAGS_MAX_COUNT}`
+  }
+
+  get series() {
+    return this.#series
+  }
+
+  set series(value: (string | Series)[]) {
+    this.#series = setFilteredField<Series>(
+      value,
+      BookField.SERIES_MAX_COUNT,
+      false
+    )
+  }
+
+  get helpTextSeries() {
+    return `${this.#series.length}/${BookField.SERIES_MAX_COUNT}`
   }
 }
 

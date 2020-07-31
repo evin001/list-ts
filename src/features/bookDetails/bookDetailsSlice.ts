@@ -10,11 +10,13 @@ import {
   searchBooks,
   searchGenres,
   searchTags,
+  searchSeries,
   setBookList as setBookListAPI,
   ListItem,
   Author,
   Genre,
   Tag,
+  Series,
   FilteredBook,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
@@ -26,6 +28,7 @@ interface BookDetailsState {
   filteredAuthors: Author[]
   filteredGenres: Genre[]
   filteredTags: Tag[]
+  filteredSeries: Series[]
   filteredBooks: FilteredBook[]
 }
 
@@ -34,6 +37,7 @@ const initialState: BookDetailsState = {
   filteredAuthors: [],
   filteredGenres: [],
   filteredTags: [],
+  filteredSeries: [],
   filteredBooks: [],
 }
 
@@ -71,6 +75,13 @@ export const findTags = createAsyncThunk(
   `${thunkPrefix}/findTags`,
   async (needle: string) => {
     return await searchTags(needle)
+  }
+)
+
+export const findSeries = createAsyncThunk(
+  `${thunkPrefix}/findSeries`,
+  async (needle: string) => {
+    return await searchSeries(needle)
   }
 )
 
@@ -122,6 +133,7 @@ const bookDetailsSlice = createSlice({
     setField(findAuthors.fulfilled, 'filteredAuthors')
     setField(findGenres.fulfilled, 'filteredGenres')
     setField(findTags.fulfilled, 'filteredTags')
+    setField(findSeries.fulfilled, 'filteredSeries')
     setField(findBooks.fulfilled, 'filteredBooks')
 
     errorStub(setBookList.rejected)
