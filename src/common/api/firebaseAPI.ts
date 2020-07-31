@@ -21,6 +21,16 @@ export interface User {
   email?: string
 }
 
+export interface ShortItemList
+  extends Omit<ListItem, 'book' | 'readingTarget'> {
+  shortBook: ShortBook
+}
+
+export type ShortBook = Omit<
+  Book,
+  'genres' | 'tags' | 'series' | 'numberInSeries' | 'edition' | 'description'
+>
+
 export interface ListItem {
   id: string
   doneDate?: number
@@ -92,6 +102,42 @@ export async function signInByEmail(
   return void 0
 }
 
+export async function getUserBooks(userId: string): Promise<ShortItemList[]> {
+  const listDocs = await store
+    .collection('lists')
+    .where('userId', '==', store.collection('users').doc(userId))
+    .limit(20)
+    .get()
+
+  const shortItemList: ShortItemList[] = []
+  for (const listDoc of listDocs.docs) {
+    const listData = listDoc.data()
+    const bookDoc = await listData?.bookId.get()
+    const bookData = bookDoc.data()
+    const userDoc = await listData?.userId.get()
+    const coverUrl = await getCoverUrl(bookData.cover)
+    const authors = await fetchCollections<Author>(bookData.authors)
+
+    const itemList: ShortItemList = {
+      userId: userDoc.id,
+      id: listDoc.id,
+      doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
+      type: listData?.type,
+      shortBook: {
+        id: bookDoc.id,
+        name: bookData.name,
+        year: bookData.year,
+        cover: coverUrl,
+        authors,
+      },
+    }
+
+    shortItemList.push(itemList)
+  }
+
+  return shortItemList
+}
+
 export async function getBookFromList(listId: string): Promise<ListItem> {
   const listDoc = await store.collection('lists').doc(listId).get()
   const listData = listDoc.data()
@@ -106,10 +152,7 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
 
   const userDoc = await listData?.userId.get()
 
-  let coverUrl = ''
-  if (bookData.cover) {
-    coverUrl = await storage.ref().child(bookData.cover).getDownloadURL()
-  }
+  const coverUrl = await getCoverUrl(bookData.cover)
 
   return {
     userId: userDoc.id,
@@ -131,6 +174,13 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
       cover: coverUrl,
     },
   }
+}
+
+async function getCoverUrl(cover: string): Promise<string> {
+  if (cover) {
+    return await storage.ref().child(cover).getDownloadURL()
+  }
+  return ''
 }
 
 export async function searchAuthors(needle: string): Promise<Author[]> {

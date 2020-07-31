@@ -1,5 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit'
 import bookDetailsSlice from '~/features/bookDetails/bookDetailsSlice'
+import bookListSlice from '~/features/bookList/bookListSlice'
 import loaderReducer from '~/features/loader/loaderSlice'
 import locationReducer from '~/features/location/locationSlice'
 import notificationSlice from '~/features/notification/notificationSlice'
@@ -7,6 +8,7 @@ import userReducer from '~/features/user/userSlice'
 
 const rootReducer = combineReducers({
   bookDetails: bookDetailsSlice,
+  bookList: bookListSlice,
   loader: loaderReducer,
   location: locationReducer,
   notification: notificationSlice,
