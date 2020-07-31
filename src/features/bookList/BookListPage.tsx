@@ -1,7 +1,11 @@
+import Box from '@material-ui/core/Box'
+import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
 import CardMedia from '@material-ui/core/CardMedia'
+import CircularProgress from '@material-ui/core/CircularProgress'
+import { pink } from '@material-ui/core/colors'
 import Grid from '@material-ui/core/Grid'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
@@ -12,7 +16,7 @@ import { ShortItemList, Author } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
-import { fetchUserBooks } from './bookListSlice'
+import { fetchUserBooks, resetShortItemList } from './bookListSlice'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -33,6 +37,19 @@ const useStyles = makeStyles(
       height: 300,
       backgroundSize: '100%',
     },
+    loadMoreContainer: {
+      position: 'relative',
+      textAlign: 'center',
+      marginTop: theme.spacing(3),
+    },
+    buttonProgress: {
+      color: pink[500],
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      marginTop: -9,
+      marginLeft: -9,
+    },
   }),
   { name: 'BookListPage' }
 )
@@ -40,19 +57,32 @@ const useStyles = makeStyles(
 const BookListPage = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
-  const { user, shortItemList } = useSelector((store: RootState) => ({
+  const { user, shortItemList, loading } = useSelector((store: RootState) => ({
     user: store.user.user,
     shortItemList: store.bookList.shortItemList,
+    loading: store.loader.loading,
   }))
 
   useEffect(() => {
-    if (user?.id) {
-      dispatch(fetchUserBooks({ userId: user.id }))
-    }
+    dispatch(resetShortItemList())
+    fetchBooks()
   }, [user])
+
+  function fetchBooks(lastItemId = '') {
+    if (user?.id) {
+      dispatch(fetchUserBooks({ userId: user.id, lastItemId }))
+    }
+  }
 
   const handleClickBook = (listId: string) => () => {
     dispatch(redirect(`/book/${listId}`))
+  }
+
+  const handleLoadMore = () => {
+    const lastItemId = shortItemList.length
+      ? shortItemList[shortItemList.length - 1].id
+      : ''
+    fetchBooks(lastItemId)
   }
 
   return (
@@ -86,6 +116,21 @@ const BookListPage = () => {
           </Grid>
         ))}
       </Grid>
+      {shortItemList.length > 0 && (
+        <Box className={classes.loadMoreContainer}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleLoadMore}
+            disabled={loading}
+          >
+            Ещё
+          </Button>
+          {loading && (
+            <CircularProgress size={18} className={classes.buttonProgress} />
+          )}
+        </Box>
+      )}
     </div>
   )
 }

@@ -102,12 +102,21 @@ export async function signInByEmail(
   return void 0
 }
 
-export async function getUserBooks(userId: string): Promise<ShortItemList[]> {
-  const listDocs = await store
+export async function getUserBooks(
+  userId: string,
+  lastItemId: string
+): Promise<ShortItemList[]> {
+  let request = store
     .collection('lists')
     .where('userId', '==', store.collection('users').doc(userId))
-    .limit(20)
-    .get()
+    .limit(3)
+
+  if (lastItemId) {
+    const lastItemDoc = await store.collection('lists').doc(lastItemId).get()
+    request = request.startAfter(lastItemDoc)
+  }
+
+  const listDocs = await request.get()
 
   const shortItemList: ShortItemList[] = []
   for (const listDoc of listDocs.docs) {
