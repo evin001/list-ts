@@ -14,6 +14,7 @@ const styles = (theme: Theme) =>
   createStyles({
     root: {
       paddingBottom: theme.spacing(3),
+      maxWidth: 742,
     },
   })
 

@@ -47,8 +47,8 @@ const useStyles = makeStyles(
       position: 'absolute',
       top: '50%',
       left: '50%',
-      marginTop: -9,
-      marginLeft: -9,
+      marginTop: -12,
+      marginLeft: -12,
     },
   }),
   { name: 'BookListPage' }
@@ -127,7 +127,7 @@ const BookListPage = () => {
             Ещё
           </Button>
           {loading && (
-            <CircularProgress size={18} className={classes.buttonProgress} />
+            <CircularProgress size={24} className={classes.buttonProgress} />
           )}
         </Box>
       )}
