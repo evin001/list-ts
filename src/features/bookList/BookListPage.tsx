@@ -1,11 +1,8 @@
 import Box from '@material-ui/core/Box'
-import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
 import CardMedia from '@material-ui/core/CardMedia'
-import CircularProgress from '@material-ui/core/CircularProgress'
-import { pink } from '@material-ui/core/colors'
 import Grid from '@material-ui/core/Grid'
 import IconButton from '@material-ui/core/IconButton'
 import { makeStyles, Theme } from '@material-ui/core/styles'
@@ -17,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~/app/rootReducer'
 import { ShortItemList, Author, ListItemType } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
+import MoreButton from '~/common/components/MoreButtn'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
 import BookFilters from './BookFilters'
@@ -37,19 +35,6 @@ const useStyles = makeStyles(
     media: {
       height: 300,
       backgroundSize: '100%',
-    },
-    loadMoreContainer: {
-      position: 'relative',
-      textAlign: 'center',
-      marginTop: theme.spacing(3),
-    },
-    buttonProgress: {
-      color: pink[500],
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      marginTop: -12,
-      marginLeft: -12,
     },
     headerContainer: {
       display: 'flex',
@@ -91,7 +76,7 @@ const BookListPage = () => {
     }
   }
 
-  const handleLoadMore = () => fetchBooks()
+  const handleLoadMore = () => fetchBooks({ reset: false })
 
   const handleClickBook = (listId = '') => () => {
     dispatch(redirect(`/book/${listId}`))
@@ -149,21 +134,7 @@ const BookListPage = () => {
           </Grid>
         ))}
       </Grid>
-      {shortItemList.length > 0 && (
-        <Box className={classes.loadMoreContainer}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleLoadMore}
-            disabled={loading}
-          >
-            Загрузить ещё
-          </Button>
-          {loading && (
-            <CircularProgress size={24} className={classes.buttonProgress} />
-          )}
-        </Box>
-      )}
+      {shortItemList.length > 0 && <MoreButton onClick={handleLoadMore} />}
     </div>
   )
 }

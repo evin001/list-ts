@@ -11,12 +11,13 @@ const thunkPrefix = 'quotes'
 export const fetchQuotes = createAsyncThunk(
   `${thunkPrefix}/fetchQuotes`,
   async (
-    args: { bookId: string; userId?: string; lastId?: string },
+    args: { bookId: string; userId?: string; lastId?: string; reset?: boolean },
     { dispatch }
   ) => {
     try {
       dispatch(loading())
-      return await getQuotes(args)
+      const quotes = await getQuotes(args)
+      return { quotes, reset: args.reset }
     } finally {
       dispatch(loaded())
     }
@@ -33,7 +34,8 @@ const quotesSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchQuotes.fulfilled, (state, action) => {
-      state.quotes = action.payload
+      const { quotes, reset } = action.payload
+      state.quotes = reset ? quotes : state.quotes.concat(quotes)
     })
     builder.addCase(fetchQuotes.rejected, (state, action) => {
       console.log({ action })

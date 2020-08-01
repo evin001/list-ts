@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
+import MoreButton from '~/common/components/MoreButtn'
 import { fetchQuotes } from './quotesSlice'
 
 const useStyles = makeStyles(
@@ -61,6 +62,13 @@ const QuotesPage = () => {
     }
   }, [user])
 
+  function loadMore(options: { reset?: boolean }) {
+    const lastId = quotes.length ? quotes[quotes.length - 1].id : ''
+    dispatch(fetchQuotes({ bookId, userId: user?.id, lastId }))
+  }
+
+  const handleLoadMore = () => loadMore()
+
   return (
     <div className={classes.root}>
       {quotes.map((item: Quote) => (
@@ -71,6 +79,7 @@ const QuotesPage = () => {
           <CardContent className={classes.content}>{item.quote}</CardContent>
         </Card>
       ))}
+      {quotes.length > 0 && <MoreButton onClick={handleLoadMore} />}
     </div>
   )
 }
