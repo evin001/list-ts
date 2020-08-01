@@ -1,28 +1,28 @@
 import Card from '@material-ui/core/Card'
+import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
-import { blue } from '@material-ui/core/colors'
+import IconButton from '@material-ui/core/IconButton'
 import Paper from '@material-ui/core/Paper'
 import { makeStyles, Theme } from '@material-ui/core/styles'
+import DeleteIcon from '@material-ui/icons/Delete'
+import EditIcon from '@material-ui/icons/Edit'
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
-import clsx from 'clsx'
-import React, { useEffect } from 'react'
+import ShareIcon from '@material-ui/icons/Share'
+import React, { Fragment, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
 import MoreButton from '~/common/components/MoreButtn'
 import { fetchQuotes } from './quotesSlice'
+import { getColor } from './utils'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
-    root: {},
     card: {
       position: 'relative',
       overflow: 'initial',
       marginTop: theme.spacing(4),
-    },
-    blue: {
-      background: blue[500],
     },
     quote: {
       position: 'absolute',
@@ -41,7 +41,11 @@ const useStyles = makeStyles(
       justifyContent: 'center',
     },
     content: {
-      paddingTop: theme.spacing(3),
+      paddingTop: theme.spacing(4),
+      paddingBottom: 0,
+    },
+    actions: {
+      justifyContent: 'center',
     },
   }),
   { name: 'QuotesPage' }
@@ -62,23 +66,43 @@ const QuotesPage = () => {
     }
   }, [user])
 
-  function loadMore(options: { reset?: boolean }) {
+  function loadMore(options: { reset?: boolean } = {}) {
     const lastId = quotes.length ? quotes[quotes.length - 1].id : ''
-    dispatch(fetchQuotes({ bookId, userId: user?.id, lastId }))
+    dispatch(
+      fetchQuotes({ bookId, userId: user?.id, lastId, reset: options.reset })
+    )
   }
 
-  const handleLoadMore = () => loadMore()
+  const handleLoadMore = () => loadMore({ reset: false })
 
   return (
-    <div className={classes.root}>
-      {quotes.map((item: Quote) => (
-        <Card className={classes.card} key={item.id}>
-          <Paper className={clsx(classes.quote, classes.blue)}>
-            <FormatQuoteIcon />
-          </Paper>
-          <CardContent className={classes.content}>{item.quote}</CardContent>
-        </Card>
-      ))}
+    <div>
+      {quotes.map((item: Quote, index: number) => {
+        const color = getColor(index)
+        return (
+          <Card className={classes.card} key={item.id}>
+            <Paper className={classes.quote} style={{ background: color }}>
+              <FormatQuoteIcon />
+            </Paper>
+            <CardContent className={classes.content}>{item.quote}</CardContent>
+            <CardActions disableSpacing className={classes.actions}>
+              <IconButton>
+                <ShareIcon style={{ color }} />
+              </IconButton>
+              {user?.id === item.userId && (
+                <Fragment>
+                  <IconButton>
+                    <EditIcon style={{ color }} />
+                  </IconButton>
+                  <IconButton>
+                    <DeleteIcon style={{ color }} />
+                  </IconButton>
+                </Fragment>
+              )}
+            </CardActions>
+          </Card>
+        )
+      })}
       {quotes.length > 0 && <MoreButton onClick={handleLoadMore} />}
     </div>
   )
