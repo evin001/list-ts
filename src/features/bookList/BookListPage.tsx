@@ -61,7 +61,7 @@ const useStyles = makeStyles(
 )
 
 const BookListPage = () => {
-  const [bookType, setBookType] = useState<ListItemType>()
+  const [type, setType] = useState<ListItemType>()
   const classes = useStyles()
   const dispatch = useDispatch()
   const { user, shortItemList, loading } = useSelector((store: RootState) => ({
@@ -74,32 +74,40 @@ const BookListPage = () => {
 
   useWillUnmount(() => dispatch(resetShortItemList()))
 
-  function fetchBooks(lastItemId = '') {
+  function fetchBooks(options: { type?: ListItemType; reset?: boolean } = {}) {
     if (user?.id) {
-      dispatch(fetchUserBooks({ userId: user.id, lastItemId }))
+      const lastItemId =
+        !options.reset && shortItemList.length
+          ? shortItemList[shortItemList.length - 1].id
+          : ''
+      dispatch(
+        fetchUserBooks({
+          userId: user.id,
+          lastItemId,
+          type: options.reset ? options.type : type,
+          reset: options.reset,
+        })
+      )
     }
   }
+
+  const handleLoadMore = () => fetchBooks()
 
   const handleClickBook = (listId = '') => () => {
     dispatch(redirect(`/book/${listId}`))
   }
 
-  const handleLoadMore = () => {
-    const lastItemId = shortItemList.length
-      ? shortItemList[shortItemList.length - 1].id
-      : ''
-    fetchBooks(lastItemId)
-  }
-
   const handleChangeBookType = (value: ListItemType) => {
-    setBookType(value === bookType ? void 0 : value)
+    const nextType = value === type ? void 0 : value
+    fetchBooks({ type: nextType, reset: true })
+    setType(nextType)
   }
 
   return (
     <div>
       <Box className={classes.headerContainer}>
         <BookFilters
-          type={bookType}
+          type={type}
           loading={loading}
           onChangeType={handleChangeBookType}
         />

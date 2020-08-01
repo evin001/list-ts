@@ -110,7 +110,8 @@ export async function signInByEmail(
 
 export async function getUserBooks(
   userId: string,
-  lastItemId: string
+  lastItemId: string,
+  type?: ListItemType
 ): Promise<ShortItemList[]> {
   let request = store
     .collection('lists')
@@ -120,6 +121,10 @@ export async function getUserBooks(
   if (lastItemId) {
     const lastItemDoc = await store.collection('lists').doc(lastItemId).get()
     request = request.startAfter(lastItemDoc)
+  }
+
+  if (type) {
+    request = request.where('type', '==', type)
   }
 
   const listDocs = await request.get()

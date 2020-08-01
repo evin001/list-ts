@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { RootState } from '~/app/rootReducer'
-import { getUserBooks, ShortItemList } from '~/common/api/firebaseAPI'
+import {
+  getUserBooks,
+  ShortItemList,
+  ListItemType,
+} from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
 
 interface BookListState {
@@ -15,10 +18,20 @@ const thunkPrefix = 'bookList'
 
 export const fetchUserBooks = createAsyncThunk(
   `${thunkPrefix}/fetchUserBooks`,
-  async (args: { userId: string; lastItemId: string }, { dispatch }) => {
+  async (
+    args: {
+      userId: string
+      lastItemId: string
+      type?: ListItemType
+      reset?: boolean
+    },
+    { dispatch }
+  ) => {
     try {
       dispatch(loading())
-      return await getUserBooks(args.userId, args.lastItemId)
+      const { userId, lastItemId, type } = args
+      const books = await getUserBooks(userId, lastItemId, type)
+      return { books, reset: args.reset }
     } finally {
       dispatch(loaded())
     }
@@ -35,7 +48,8 @@ const bookListSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchUserBooks.fulfilled, (state, action) => {
-      state.shortItemList = state.shortItemList.concat(action.payload)
+      const { books, reset } = action.payload
+      state.shortItemList = reset ? books : state.shortItemList.concat(books)
     })
     builder.addCase(fetchUserBooks.rejected, (state, action) => {
       console.log({ action })
