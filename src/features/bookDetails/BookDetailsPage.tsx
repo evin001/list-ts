@@ -26,6 +26,7 @@ import {
   Tag,
   Series,
   ListItemType,
+  listItemTypes,
 } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 import { RuLocalizedUtils } from '~/common/utils/date'
@@ -45,7 +46,6 @@ import {
   selectBookNames,
   setBookList,
 } from './bookDetailsSlice'
-import { listItemTypes } from './constants'
 
 const COVER_SIZE_LIMIT = 512 // Kilobytes
 

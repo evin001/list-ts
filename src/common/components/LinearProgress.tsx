@@ -10,6 +10,7 @@ const useStyles = makeStyles(
     progress: {
       position: 'absolute',
       width: '100%',
+      height: 2,
     },
   }),
   { name: 'LinearProgress' }

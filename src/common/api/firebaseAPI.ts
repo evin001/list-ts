@@ -81,6 +81,12 @@ export enum ListItemType {
   Planned = 'planned',
 }
 
+export const listItemTypes = [
+  { value: ListItemType.Done, label: 'Прочитанные' },
+  { value: ListItemType.InProcess, label: 'Читаю' },
+  { value: ListItemType.Planned, label: 'Запланированные' },
+]
+
 export async function signInByEmail(
   email: string,
   password: string

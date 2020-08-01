@@ -7,22 +7,23 @@ import CardMedia from '@material-ui/core/CardMedia'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import { pink } from '@material-ui/core/colors'
 import Grid from '@material-ui/core/Grid'
+import IconButton from '@material-ui/core/IconButton'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
-import React, { useEffect } from 'react'
+import AddIcon from '@material-ui/icons/Add'
+import { useWillUnmount } from 'beautiful-react-hooks'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~/app/rootReducer'
-import { ShortItemList, Author } from '~/common/api/firebaseAPI'
+import { ShortItemList, Author, ListItemType } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
+import BookFilters from './BookFilters'
 import { fetchUserBooks, resetShortItemList } from './bookListSlice'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
-    root: {
-      paddingTop: theme.spacing(4),
-    },
     card: {
       position: 'relative',
     },
@@ -50,11 +51,17 @@ const useStyles = makeStyles(
       marginTop: -12,
       marginLeft: -12,
     },
+    headerContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      margin: `${theme.spacing(1)}px 0`,
+    },
   }),
   { name: 'BookListPage' }
 )
 
 const BookListPage = () => {
+  const [bookType, setBookType] = useState<ListItemType>()
   const classes = useStyles()
   const dispatch = useDispatch()
   const { user, shortItemList, loading } = useSelector((store: RootState) => ({
@@ -63,10 +70,9 @@ const BookListPage = () => {
     loading: store.loader.loading,
   }))
 
-  useEffect(() => {
-    dispatch(resetShortItemList())
-    fetchBooks()
-  }, [user])
+  useEffect(fetchBooks, [user])
+
+  useWillUnmount(() => dispatch(resetShortItemList()))
 
   function fetchBooks(lastItemId = '') {
     if (user?.id) {
@@ -74,7 +80,7 @@ const BookListPage = () => {
     }
   }
 
-  const handleClickBook = (listId: string) => () => {
+  const handleClickBook = (listId = '') => () => {
     dispatch(redirect(`/book/${listId}`))
   }
 
@@ -85,8 +91,27 @@ const BookListPage = () => {
     fetchBooks(lastItemId)
   }
 
+  const handleChangeBookType = (value: ListItemType) => {
+    setBookType(value === bookType ? void 0 : value)
+  }
+
   return (
-    <div className={classes.root}>
+    <div>
+      <Box className={classes.headerContainer}>
+        <BookFilters
+          type={bookType}
+          loading={loading}
+          onChangeType={handleChangeBookType}
+        />
+        <IconButton
+          color="primary"
+          component="span"
+          onClick={handleClickBook()}
+          disabled={loading}
+        >
+          <AddIcon />
+        </IconButton>
+      </Box>
       <Grid container spacing={4}>
         {shortItemList.map((item: ShortItemList) => (
           <Grid item xs={4} key={item.id}>
@@ -124,7 +149,7 @@ const BookListPage = () => {
             onClick={handleLoadMore}
             disabled={loading}
           >
-            Ещё
+            Загрузить ещё
           </Button>
           {loading && (
             <CircularProgress size={24} className={classes.buttonProgress} />
