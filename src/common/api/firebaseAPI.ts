@@ -21,6 +21,13 @@ export interface User {
   email?: string
 }
 
+export interface Quote {
+  id: string
+  userId: string
+  bookId: string
+  quote: string
+}
+
 export interface ShortItemList
   extends Omit<ListItem, 'book' | 'readingTarget'> {
   shortBook: ShortBook
@@ -108,6 +115,50 @@ export async function signInByEmail(
     }
   }
   return void 0
+}
+
+export async function getQuotes({
+  bookId,
+  userId,
+  lastId,
+}: {
+  bookId: string
+  userId?: string
+  lastId?: string
+}): Promise<Quote[]> {
+  let request = store
+    .collection('quotes')
+    .where('bookId', '==', store.collection('books').doc(bookId))
+    .limit(LIMIT_ITEMS)
+
+  if (userId) {
+    request = request.where(
+      'userId',
+      '==',
+      store.collection('users').doc(userId)
+    )
+  }
+
+  if (lastId) {
+    const lastDoc = await store.collection('quotes').doc(lastId).get()
+    request = request.startAfter(lastDoc)
+  }
+
+  const quoteDocs = await request.get()
+
+  const quotes: Quote[] = []
+  for (const quoteDoc of quoteDocs.docs) {
+    const quoteData = quoteDoc.data()
+    const quote: Quote = {
+      id: quoteDoc.id,
+      userId: quoteData.userId.id,
+      bookId: quoteData.bookId.id,
+      quote: quoteData.quote,
+    }
+    quotes.push(quote)
+  }
+
+  return quotes
 }
 
 export async function getUserBooks(
