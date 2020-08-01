@@ -87,6 +87,8 @@ export const listItemTypes = [
   { value: ListItemType.Planned, label: 'Запланированные' },
 ]
 
+const LIMIT_ITEMS = 3
+
 export async function signInByEmail(
   email: string,
   password: string
@@ -116,7 +118,7 @@ export async function getUserBooks(
   let request = store
     .collection('lists')
     .where('userId', '==', store.collection('users').doc(userId))
-    .limit(3)
+    .limit(LIMIT_ITEMS)
 
   if (lastItemId) {
     const lastItemDoc = await store.collection('lists').doc(lastItemId).get()

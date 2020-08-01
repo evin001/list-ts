@@ -1,13 +1,14 @@
 import React from 'react'
-import { Switch, Route } from 'react-router-dom'
-import BookDetailsPage from '~/features/bookDetails/BookDetailsPage'
-import BookListPage from '~/features/bookList/BookListPage'
+import { Switch } from 'react-router-dom'
+import BookDetailsRoutes from '~/features/bookDetails/Routes'
+import BookListRoutes from '~/features/bookList/Routes'
+import QuotesRoutes from '~/features/quotes/Routes'
 
 const Routes = () => (
   <Switch>
-    <Route exact path="/" component={BookListPage} />
-    <Route exact path="/book" component={BookDetailsPage} />
-    <Route exact path="/book/:id" component={BookDetailsPage} />
+    {BookListRoutes}
+    {BookDetailsRoutes}
+    {QuotesRoutes}
   </Switch>
 )
 
