@@ -1,3 +1,4 @@
+import Box from '@material-ui/core/Box'
 import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
@@ -14,10 +15,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
+import AddButton from '~/common/components/AddButton'
 import MoreButton from '~/common/components/MoreButtn'
 import { redirect } from '~/features/location/locationSlice'
 import { fetchQuotes, resetQuotes } from './quotesSlice'
-import { quoteEditRoute } from './Routes'
+import { quoteEditRoute, quoteCreateRoute } from './Routes'
 import { getColor } from './utils'
 
 type Props = {
@@ -54,6 +56,11 @@ const useStyles = makeStyles(
     actions: {
       justifyContent: 'center',
     },
+    headerContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginTop: theme.spacing(1),
+    },
   }),
   { name: 'QuotesPage' }
 )
@@ -87,8 +94,13 @@ const QuotesPage = ({ onShare }: Props) => {
   const handleClickEdit = (quoteId: string) => () =>
     dispatch(redirect(quoteEditRoute(bookId, quoteId)))
 
+  const handleClickCreate = () => dispatch(redirect(quoteCreateRoute(bookId)))
+
   return (
     <div>
+      <Box className={classes.headerContainer}>
+        <AddButton onClick={handleClickCreate} />
+      </Box>
       {quotes.map((item: Quote, index: number) => {
         const color = getColor(index)
         return (

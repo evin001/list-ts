@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~/app/rootReducer'
 import { ShortItemList, Author, ListItemType } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
+import AddButton from '~/common/components/AddButton'
 import MoreButton from '~/common/components/MoreButtn'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
@@ -96,14 +97,7 @@ const BookListPage = () => {
           loading={loading}
           onChangeType={handleChangeBookType}
         />
-        <IconButton
-          color="primary"
-          component="span"
-          onClick={handleClickBook()}
-          disabled={loading}
-        >
-          <AddIcon />
-        </IconButton>
+        <AddButton onClick={handleClickBook()} />
       </Box>
       <Grid container spacing={4}>
         {shortItemList.map((item: ShortItemList) => (

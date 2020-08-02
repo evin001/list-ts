@@ -14,8 +14,9 @@ const QuoteEditPage = () => {
   const { quoteId, bookId } = useParams()
   const [form, setForm] = useState(new QuoteForm())
   const dispatch = useDispatch()
-  const { quote } = useSelector((store: RootState) => ({
+  const { quote, user } = useSelector((store: RootState) => ({
     quote: store.quotes.quote,
+    user: store.user.user,
   }))
 
   useDidMount(() => dispatch(fetchQuote(quoteId)))
@@ -25,8 +26,13 @@ const QuoteEditPage = () => {
   useEffect(() => {
     if (quote) {
       setForm(new QuoteForm(quote))
+    } else if (user && form.bookId !== bookId && form.userId !== user.id) {
+      const nextForm = form.clone()
+      nextForm.bookId = bookId
+      nextForm.userId = user.id
+      setForm(nextForm)
     }
-  }, [quote])
+  }, [quote, user, bookId])
 
   const handleChangeQuote = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextForm = form.clone()
