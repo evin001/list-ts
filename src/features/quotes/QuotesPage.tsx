@@ -11,13 +11,15 @@ import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
 import ShareIcon from '@material-ui/icons/Share'
 import Alert from '@material-ui/lab/Alert'
 import { useWillUnmount } from 'beautiful-react-hooks'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
 import AddButton from '~/common/components/AddButton'
+import ConfirmDialog from '~/common/components/ConfirmDialog'
 import MoreButton from '~/common/components/MoreButtn'
+import RowContent from '~/common/components/RowContent'
 import { redirect } from '~/features/location/locationSlice'
 import { fetchQuotes, resetQuotes } from './quotesSlice'
 import { quoteEditRoute, quoteCreateRoute } from './Routes'
@@ -71,12 +73,16 @@ const useStyles = makeStyles(
 
 const QuotesPage = ({ onShare }: Props) => {
   const classes = useStyles()
+  const [deleteId, setDeleteId] = useState<string>()
   const { bookId } = useParams()
   const dispatch = useDispatch()
   const { user, quotes } = useSelector((store: RootState) => ({
     user: store.user.user,
     quotes: store.quotes.quotes,
   }))
+  const deleteQuoteIndex = quotes.findIndex(
+    (item: Quote) => item.id === deleteId
+  )
 
   useEffect(() => {
     if (user?.id) {
@@ -100,6 +106,15 @@ const QuotesPage = ({ onShare }: Props) => {
 
   const handleClickCreate = () => dispatch(redirect(quoteCreateRoute(bookId)))
 
+  const handleClickDelete = (value: string) => () => setDeleteId(value)
+
+  const handleCloseModal = () => setDeleteId('')
+
+  const handleDeleteQuote = () => {
+    console.log('delete', deleteId)
+    handleCloseModal()
+  }
+
   return (
     <div>
       <Box className={classes.headerContainer}>
@@ -113,11 +128,7 @@ const QuotesPage = ({ onShare }: Props) => {
               <FormatQuoteIcon />
             </Paper>
             <CardContent className={classes.content}>
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: item.quote.replace(/(?:\r\n|\r|\n)/g, '<br>'),
-                }}
-              />
+              <RowContent text={item.quote} />
             </CardContent>
             <CardActions disableSpacing className={classes.actions}>
               {onShare && (
@@ -130,7 +141,7 @@ const QuotesPage = ({ onShare }: Props) => {
                   <IconButton onClick={handleClickEdit(item.id)}>
                     <EditIcon style={{ color }} />
                   </IconButton>
-                  <IconButton>
+                  <IconButton onClick={handleClickDelete(item.id)}>
                     <DeleteIcon style={{ color }} />
                   </IconButton>
                 </Fragment>
@@ -139,11 +150,22 @@ const QuotesPage = ({ onShare }: Props) => {
           </Card>
         )
       })}
+      <ConfirmDialog
+        title="Вы действительно хотите удалить цитату?"
+        open={deleteQuoteIndex !== -1}
+        onClose={handleCloseModal}
+        onConfirm={handleDeleteQuote}
+        agreeText="Удалить"
+      >
+        {deleteQuoteIndex !== -1 && (
+          <RowContent text={quotes[deleteQuoteIndex].quote} />
+        )}
+      </ConfirmDialog>
       {quotes.length > 0 ? (
         <MoreButton onClick={handleLoadMore} />
       ) : (
         <Alert severity="info" className={classes.emptyQuotes}>
-          Нет доступных цитат.
+          Нет доступных цитат
         </Alert>
       )}
     </div>
