@@ -1,5 +1,5 @@
 import TextField from '@material-ui/core/TextField'
-import { useDidMount } from 'beautiful-react-hooks'
+import { useDidMount, useWillUnmount } from 'beautiful-react-hooks'
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -7,7 +7,7 @@ import { RootState } from '~/app/rootReducer'
 import EditButtonGroup from '~/common/components/EditButtonGroup'
 import { redirect } from '~/features/location/locationSlice'
 import QuoteForm from './QuoteForm'
-import { fetchQuote } from './quotesSlice'
+import { fetchQuote, resetQuote, setQuote } from './quotesSlice'
 import { quotesRoute } from './Routes'
 
 const QuoteEditPage = () => {
@@ -19,6 +19,8 @@ const QuoteEditPage = () => {
   }))
 
   useDidMount(() => dispatch(fetchQuote(quoteId)))
+
+  useWillUnmount(() => dispatch(resetQuote()))
 
   useEffect(() => {
     if (quote) {
@@ -34,7 +36,7 @@ const QuoteEditPage = () => {
 
   const handleCancel = () => dispatch(redirect(quotesRoute(bookId)))
 
-  const handleSave = () => {}
+  const handleSave = () => dispatch(setQuote(form.toObject()))
 
   return (
     <div>

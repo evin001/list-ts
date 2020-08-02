@@ -16,12 +16,16 @@ class QuoteForm {
   }
 
   clone() {
-    return new QuoteForm({
+    return new QuoteForm(this.toObject())
+  }
+
+  toObject(): Quote {
+    return {
       id: this.#id,
       bookId: this.#bookId,
       userId: this.#userId,
       quote: this.#quote,
-    })
+    }
   }
 
   get hasError() {

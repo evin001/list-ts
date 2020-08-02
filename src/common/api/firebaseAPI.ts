@@ -117,15 +117,21 @@ export async function signInByEmail(
   return void 0
 }
 
+export async function setQuote(quote: Quote): Promise<void> {
+  const quoteDoc = getDocID(quote.id, 'quotes')
+  await quoteDoc.set(
+    {
+      bookId: getBookRef(quote.bookId),
+      userId: getUserRef(quote.userId),
+      quote: quote.quote,
+    },
+    { merge: true }
+  )
+}
+
 export async function getQuote(quoteId: string): Promise<Quote> {
   const quoteDoc = await store.collection('quotes').doc(quoteId).get()
-  const quoteData = quoteDoc.data()
-  return {
-    id: quoteDoc.id || '',
-    bookId: quoteData?.bookId.id || '',
-    userId: quoteData?.userId.id || '',
-    quote: quoteData?.quote || '',
-  }
+  return getQuoteFromDoc(quoteDoc)
 }
 
 export async function getQuotes({
@@ -139,15 +145,11 @@ export async function getQuotes({
 }): Promise<Quote[]> {
   let request = store
     .collection('quotes')
-    .where('bookId', '==', store.collection('books').doc(bookId))
+    .where('bookId', '==', getBookRef(bookId))
     .limit(LIMIT_ITEMS)
 
   if (userId) {
-    request = request.where(
-      'userId',
-      '==',
-      store.collection('users').doc(userId)
-    )
+    request = request.where('userId', '==', getUserRef(userId))
   }
 
   if (lastId) {
@@ -159,17 +161,20 @@ export async function getQuotes({
 
   const quotes: Quote[] = []
   for (const quoteDoc of quoteDocs.docs) {
-    const quoteData = quoteDoc.data()
-    const quote: Quote = {
-      id: quoteDoc.id,
-      userId: quoteData.userId.id,
-      bookId: quoteData.bookId.id,
-      quote: quoteData.quote,
-    }
-    quotes.push(quote)
+    quotes.push(getQuoteFromDoc(quoteDoc))
   }
 
   return quotes
+}
+
+function getQuoteFromDoc(quoteDoc: firebase.firestore.DocumentSnapshot): Quote {
+  const quoteData = quoteDoc.data()
+  return {
+    id: quoteDoc.id,
+    userId: quoteData?.userId.id || '',
+    bookId: quoteData?.bookId.id || '',
+    quote: quoteData?.quote || '',
+  }
 }
 
 export async function getUserBooks(
@@ -179,7 +184,7 @@ export async function getUserBooks(
 ): Promise<ShortItemList[]> {
   let request = store
     .collection('lists')
-    .where('userId', '==', store.collection('users').doc(userId))
+    .where('userId', '==', getUserRef(userId))
     .limit(LIMIT_ITEMS)
 
   if (lastItemId) {
@@ -476,4 +481,12 @@ export async function searchBooks(
     numberInSeries: bookDoc.data().numberInSeries,
     cover: bookDoc.data().cover,
   }))
+}
+
+function getBookRef(bookId: string) {
+  return store.collection('books').doc(bookId)
+}
+
+function getUserRef(userId: string) {
+  return store.collection('users').doc(userId)
 }

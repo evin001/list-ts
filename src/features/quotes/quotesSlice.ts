@@ -1,6 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { getQuotes, getQuote, Quote } from '~/common/api/firebaseAPI'
+import {
+  getQuotes,
+  getQuote,
+  setQuote as setQuoteAPI,
+  Quote,
+} from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
+import { redirect } from '~/features/location/locationSlice'
+import { success, error } from '~/features/notification/notificationSlice'
+import { quotesRoute } from './Routes'
 
 interface QuotesState {
   quotes: Quote[]
@@ -8,6 +16,22 @@ interface QuotesState {
 }
 
 const thunkPrefix = 'quotes'
+
+export const setQuote = createAsyncThunk(
+  `${thunkPrefix}/setQuote`,
+  async (quote: Quote, { dispatch }) => {
+    try {
+      dispatch(loading())
+      await setQuoteAPI(quote)
+      dispatch(success(`Цитата ${quote.id ? 'обновлена' : 'добавлена'}`))
+      dispatch(redirect(quotesRoute(quote.bookId)))
+    } catch (e) {
+      dispatch(error(`Не удалось ${quote.id ? 'обновить' : 'добавить'} цитату`))
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const fetchQuote = createAsyncThunk(
   `${thunkPrefix}/fetchQuote`,
@@ -48,25 +72,22 @@ const quotesSlice = createSlice({
     resetQuotes(state) {
       state.quotes = []
     },
+    resetQuote(state) {
+      state.quote = void 0
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchQuotes.fulfilled, (state, action) => {
       const { quotes, reset } = action.payload
       state.quotes = reset ? quotes : state.quotes.concat(quotes)
     })
-    builder.addCase(fetchQuotes.rejected, (state, action) => {
-      console.log({ action })
-    })
 
     builder.addCase(fetchQuote.fulfilled, (state, action) => {
       state.quote = action.payload
     })
-    builder.addCase(fetchQuote.rejected, (state, action) => {
-      console.log({ action })
-    })
   },
 })
 
-export const { resetQuotes } = quotesSlice.actions
+export const { resetQuotes, resetQuote } = quotesSlice.actions
 
 export default quotesSlice.reducer
