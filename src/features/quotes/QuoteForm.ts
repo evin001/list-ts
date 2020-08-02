@@ -29,7 +29,7 @@ class QuoteForm {
   }
 
   get hasError() {
-    return this.#quote === ''
+    return this.#quote === '' || /[<>]/.test(this.#quote)
   }
 
   get quote() {

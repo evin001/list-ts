@@ -108,7 +108,13 @@ const QuotesPage = ({ onShare }: Props) => {
             <Paper className={classes.quote} style={{ background: color }}>
               <FormatQuoteIcon />
             </Paper>
-            <CardContent className={classes.content}>{item.quote}</CardContent>
+            <CardContent className={classes.content}>
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: item.quote.replace(/(?:\r\n|\r|\n)/g, '<br>'),
+                }}
+              />
+            </CardContent>
             <CardActions disableSpacing className={classes.actions}>
               {onShare && (
                 <IconButton>
