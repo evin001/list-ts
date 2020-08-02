@@ -14,8 +14,14 @@ import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
 import MoreButton from '~/common/components/MoreButtn'
+import { redirect } from '~/features/location/locationSlice'
 import { fetchQuotes } from './quotesSlice'
+import { quoteEditRoute } from './Routes'
 import { getColor } from './utils'
+
+type Props = {
+  onShare?: () => void
+}
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -51,7 +57,7 @@ const useStyles = makeStyles(
   { name: 'QuotesPage' }
 )
 
-const QuotesPage = () => {
+const QuotesPage = ({ onShare }: Props) => {
   const classes = useStyles()
   const { bookId } = useParams()
   const dispatch = useDispatch()
@@ -75,6 +81,9 @@ const QuotesPage = () => {
 
   const handleLoadMore = () => loadMore({ reset: false })
 
+  const handleClickEdit = (quoteId: string) => () =>
+    dispatch(redirect(quoteEditRoute(bookId, quoteId)))
+
   return (
     <div>
       {quotes.map((item: Quote, index: number) => {
@@ -86,12 +95,14 @@ const QuotesPage = () => {
             </Paper>
             <CardContent className={classes.content}>{item.quote}</CardContent>
             <CardActions disableSpacing className={classes.actions}>
-              <IconButton>
-                <ShareIcon style={{ color }} />
-              </IconButton>
+              {onShare && (
+                <IconButton>
+                  <ShareIcon style={{ color }} />
+                </IconButton>
+              )}
               {user?.id === item.userId && (
                 <Fragment>
-                  <IconButton>
+                  <IconButton onClick={handleClickEdit(item.id)}>
                     <EditIcon style={{ color }} />
                   </IconButton>
                   <IconButton>
