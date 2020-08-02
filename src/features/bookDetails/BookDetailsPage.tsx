@@ -29,6 +29,7 @@ import {
   listItemTypes,
 } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
+import EditButtonGroup from '~/common/components/EditButtonGroup'
 import { RuLocalizedUtils } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
 import BookDetailsForm, {
@@ -51,13 +52,6 @@ const COVER_SIZE_LIMIT = 512 // Kilobytes
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
-    footer: {
-      marginTop: theme.spacing(2),
-    },
-    buttonDivider: {
-      display: 'inline-block',
-      width: theme.spacing(2),
-    },
     datePickerBox: {
       margin: `${theme.spacing(2)}px 0 ${theme.spacing(1)}px`,
       '& > div': {
@@ -111,7 +105,6 @@ const BookDetailsPage = () => {
     filteredAuthors,
     filteredBooks,
     filteredBookNames,
-    loading,
   } = useSelector(
     (store: RootState) => ({
       user: store.user.user,
@@ -122,7 +115,6 @@ const BookDetailsPage = () => {
       filteredSeries: store.bookDetails.filteredSeries,
       filteredBooks: store.bookDetails.filteredBooks,
       filteredBookNames: selectBookNames(store.bookDetails),
-      loading: store.loader.loading,
     }),
     shallowEqual
   )
@@ -497,18 +489,12 @@ const BookDetailsPage = () => {
           </Select>
         </FormControl>
       </Box>
-      <Box className={classes.footer}>
-        <Button onClick={handleCancel}>Отменить</Button>
-        <div className={classes.buttonDivider} />
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={details.hasError || loading}
-          onClick={handleSave}
-        >
-          {id ? 'Обновить' : 'Создать'}
-        </Button>
-      </Box>
+      <EditButtonGroup
+        id={id}
+        disabled={details.hasError}
+        onCancel={handleCancel}
+        onSave={handleSave}
+      />
     </div>
   )
 }
