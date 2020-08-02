@@ -1,6 +1,7 @@
 import TextField from '@material-ui/core/TextField'
+import Alert from '@material-ui/lab/Alert'
 import { useDidMount, useWillUnmount } from 'beautiful-react-hooks'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
@@ -44,8 +45,16 @@ const QuoteEditPage = () => {
 
   const handleSave = () => dispatch(setQuote(form.toObject()))
 
+  if (user && form.userId && form.userId !== user.id) {
+    return (
+      <Alert severity="error" style={{ marginTop: 16 }}>
+        Можно редактировать только свои цитаты
+      </Alert>
+    )
+  }
+
   return (
-    <div>
+    <Fragment>
       <TextField
         id="quote"
         label="Цитата"
@@ -64,7 +73,7 @@ const QuoteEditPage = () => {
         onCancel={handleCancel}
         onSave={handleSave}
       />
-    </div>
+    </Fragment>
   )
 }
 
