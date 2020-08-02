@@ -9,6 +9,7 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
 import ShareIcon from '@material-ui/icons/Share'
+import Alert from '@material-ui/lab/Alert'
 import { useWillUnmount } from 'beautiful-react-hooks'
 import React, { Fragment, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -59,6 +60,9 @@ const useStyles = makeStyles(
     headerContainer: {
       display: 'flex',
       justifyContent: 'space-between',
+      marginTop: theme.spacing(1),
+    },
+    emptyQuotes: {
       marginTop: theme.spacing(1),
     },
   }),
@@ -135,7 +139,13 @@ const QuotesPage = ({ onShare }: Props) => {
           </Card>
         )
       })}
-      {quotes.length > 0 && <MoreButton onClick={handleLoadMore} />}
+      {quotes.length > 0 ? (
+        <MoreButton onClick={handleLoadMore} />
+      ) : (
+        <Alert severity="info" className={classes.emptyQuotes}>
+          Нет доступных цитат.
+        </Alert>
+      )}
     </div>
   )
 }
