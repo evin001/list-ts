@@ -2,12 +2,14 @@ import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
-import React, { useState } from 'react'
+import { useDidMount } from 'beautiful-react-hooks'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import { redirect } from '~/features/location/locationSlice'
 import QuoteForm from './QuoteForm'
+import { fetchQuote } from './quotesSlice'
 import { quotesRoute } from './Routes'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -23,14 +25,29 @@ const useStyles = makeStyles((theme: Theme) => ({
 const QuoteEditPage = () => {
   const classes = useStyles()
   const { quoteId, bookId } = useParams()
-  const [form] = useState(new QuoteForm())
+  const [form, setForm] = useState(new QuoteForm())
   const dispatch = useDispatch()
-  const { loading } = useSelector((store: RootState) => ({
+  const { loading, quote } = useSelector((store: RootState) => ({
     loading: store.loader.loading,
+    quote: store.quotes.quote,
   }))
 
-  const handleChangeQuote = () => {}
+  useDidMount(() => dispatch(fetchQuote(quoteId)))
+
+  useEffect(() => {
+    if (quote) {
+      setForm(new QuoteForm(quote))
+    }
+  }, [quote])
+
+  const handleChangeQuote = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextForm = form.clone()
+    nextForm.quote = event.target.value
+    setForm(nextForm)
+  }
+
   const handleCancel = () => dispatch(redirect(quotesRoute(bookId)))
+
   const handleSave = () => {}
 
   return (

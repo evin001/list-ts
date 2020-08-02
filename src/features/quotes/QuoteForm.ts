@@ -15,6 +15,15 @@ class QuoteForm {
     this.#quote = quote?.quote || ''
   }
 
+  clone() {
+    return new QuoteForm({
+      id: this.#id,
+      bookId: this.#bookId,
+      userId: this.#userId,
+      quote: this.#quote,
+    })
+  }
+
   get hasError() {
     return this.#quote === ''
   }

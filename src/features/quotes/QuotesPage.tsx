@@ -8,6 +8,7 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
 import ShareIcon from '@material-ui/icons/Share'
+import { useWillUnmount } from 'beautiful-react-hooks'
 import React, { Fragment, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -15,7 +16,7 @@ import { RootState } from '~/app/rootReducer'
 import { Quote } from '~/common/api/firebaseAPI'
 import MoreButton from '~/common/components/MoreButtn'
 import { redirect } from '~/features/location/locationSlice'
-import { fetchQuotes } from './quotesSlice'
+import { fetchQuotes, resetQuotes } from './quotesSlice'
 import { quoteEditRoute } from './Routes'
 import { getColor } from './utils'
 
@@ -71,6 +72,8 @@ const QuotesPage = ({ onShare }: Props) => {
       dispatch(fetchQuotes({ bookId, userId: user.id }))
     }
   }, [user])
+
+  useWillUnmount(() => dispatch(resetQuotes()))
 
   function loadMore(options: { reset?: boolean } = {}) {
     const lastId = quotes.length ? quotes[quotes.length - 1].id : ''

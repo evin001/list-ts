@@ -117,6 +117,17 @@ export async function signInByEmail(
   return void 0
 }
 
+export async function getQuote(quoteId: string): Promise<Quote> {
+  const quoteDoc = await store.collection('quotes').doc(quoteId).get()
+  const quoteData = quoteDoc.data()
+  return {
+    id: quoteDoc.id || '',
+    bookId: quoteData?.bookId.id || '',
+    userId: quoteData?.userId.id || '',
+    quote: quoteData?.quote || '',
+  }
+}
+
 export async function getQuotes({
   bookId,
   userId,

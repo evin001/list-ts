@@ -1,12 +1,25 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { getQuotes, Quote } from '~/common/api/firebaseAPI'
+import { getQuotes, getQuote, Quote } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
 
 interface QuotesState {
   quotes: Quote[]
+  quote?: Quote
 }
 
 const thunkPrefix = 'quotes'
+
+export const fetchQuote = createAsyncThunk(
+  `${thunkPrefix}/fetchQuote`,
+  async (quoteId: string, { dispatch }) => {
+    try {
+      dispatch(loading())
+      return await getQuote(quoteId)
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const fetchQuotes = createAsyncThunk(
   `${thunkPrefix}/fetchQuotes`,
@@ -31,7 +44,11 @@ const initialState: QuotesState = {
 const quotesSlice = createSlice({
   name: 'quotes',
   initialState,
-  reducers: {},
+  reducers: {
+    resetQuotes(state) {
+      state.quotes = []
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchQuotes.fulfilled, (state, action) => {
       const { quotes, reset } = action.payload
@@ -40,7 +57,16 @@ const quotesSlice = createSlice({
     builder.addCase(fetchQuotes.rejected, (state, action) => {
       console.log({ action })
     })
+
+    builder.addCase(fetchQuote.fulfilled, (state, action) => {
+      state.quote = action.payload
+    })
+    builder.addCase(fetchQuote.rejected, (state, action) => {
+      console.log({ action })
+    })
   },
 })
+
+export const { resetQuotes } = quotesSlice.actions
 
 export default quotesSlice.reducer
