@@ -145,6 +145,7 @@ export async function getQuotes({
 }): Promise<Quote[]> {
   let request = store
     .collection('quotes')
+    .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
     .where('bookId', '==', getBookRef(bookId))
     .limit(LIMIT_ITEMS)
 
@@ -184,6 +185,7 @@ export async function getUserBooks(
 ): Promise<ShortItemList[]> {
   let request = store
     .collection('lists')
+    .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
     .where('userId', '==', getUserRef(userId))
     .limit(LIMIT_ITEMS)
 
