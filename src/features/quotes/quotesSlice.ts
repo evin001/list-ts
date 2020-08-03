@@ -3,6 +3,7 @@ import {
   getQuotes,
   getQuote,
   setQuote as setQuoteAPI,
+  deleteQuote as deleteQuoteAPI,
   Quote,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
@@ -16,6 +17,28 @@ interface QuotesState {
 }
 
 const thunkPrefix = 'quotes'
+
+export const deleteQuote = createAsyncThunk(
+  `${thunkPrefix}/deleteQuote`,
+  async (args: { bookId: string; quoteId: string }, { dispatch }) => {
+    try {
+      dispatch(loading())
+      await deleteQuoteAPI(args.bookId, args.quoteId)
+      dispatch(success('Цитата удалена'))
+      dispatch(
+        fetchQuotes({
+          bookId: args.bookId,
+          reset: true,
+          userId: 'qCQYcAdf9Ju40kwK4s6w',
+        })
+      )
+    } catch (e) {
+      dispatch(error('Не удалось удалить цитату'))
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const setQuote = createAsyncThunk(
   `${thunkPrefix}/setQuote`,

@@ -116,6 +116,13 @@ export async function signInByEmail(
   return void 0
 }
 
+export async function deleteQuote(
+  bookId: string,
+  quoteId: string
+): Promise<void> {
+  await getDocID(quoteId, getQuotesPath(bookId)).delete()
+}
+
 export async function setQuote(bookId: string, quote: Quote): Promise<void> {
   const quoteDoc = getDocID(quote.id, getQuotesPath(bookId))
   await quoteDoc.set(

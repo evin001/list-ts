@@ -21,7 +21,7 @@ import ConfirmDialog from '~/common/components/ConfirmDialog'
 import MoreButton from '~/common/components/MoreButtn'
 import RowContent from '~/common/components/RowContent'
 import { redirect } from '~/features/location/locationSlice'
-import { fetchQuotes, resetQuotes } from './quotesSlice'
+import { fetchQuotes, resetQuotes, deleteQuote } from './quotesSlice'
 import { quoteEditRoute, quoteCreateRoute } from './Routes'
 import { getColor } from './utils'
 
@@ -111,7 +111,9 @@ const QuotesPage = ({ onShare }: Props) => {
   const handleCloseModal = () => setDeleteId('')
 
   const handleDeleteQuote = () => {
-    console.log('delete', deleteId)
+    if (deleteId) {
+      dispatch(deleteQuote({ bookId, quoteId: deleteId }))
+    }
     handleCloseModal()
   }
 
