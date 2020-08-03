@@ -19,12 +19,13 @@ const thunkPrefix = 'quotes'
 
 export const setQuote = createAsyncThunk(
   `${thunkPrefix}/setQuote`,
-  async (quote: Quote, { dispatch }) => {
+  async (args: { quote: Quote; bookId: string }, { dispatch }) => {
+    const { quote, bookId } = args
     try {
       dispatch(loading())
-      await setQuoteAPI(quote)
+      await setQuoteAPI(bookId, quote)
       dispatch(success(`Цитата ${quote.id ? 'обновлена' : 'добавлена'}`))
-      dispatch(redirect(quotesRoute(quote.bookId)))
+      dispatch(redirect(quotesRoute(bookId)))
     } catch (e) {
       dispatch(error(`Не удалось ${quote.id ? 'обновить' : 'добавить'} цитату`))
     } finally {
@@ -35,10 +36,10 @@ export const setQuote = createAsyncThunk(
 
 export const fetchQuote = createAsyncThunk(
   `${thunkPrefix}/fetchQuote`,
-  async (quoteId: string, { dispatch }) => {
+  async (args: { bookId: string; quoteId: string }, { dispatch }) => {
     try {
       dispatch(loading())
-      return await getQuote(quoteId)
+      return await getQuote(args.bookId, args.quoteId)
     } finally {
       dispatch(loaded())
     }

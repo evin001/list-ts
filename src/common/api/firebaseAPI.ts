@@ -24,7 +24,6 @@ export interface User {
 export interface Quote {
   id: string
   userId: string
-  bookId: string
   quote: string
 }
 
@@ -117,11 +116,10 @@ export async function signInByEmail(
   return void 0
 }
 
-export async function setQuote(quote: Quote): Promise<void> {
-  const quoteDoc = getDocID(quote.id, 'quotes')
+export async function setQuote(bookId: string, quote: Quote): Promise<void> {
+  const quoteDoc = getDocID(quote.id, getQuotesPath(bookId))
   await quoteDoc.set(
     {
-      bookId: getBookRef(quote.bookId),
       userId: getUserRef(quote.userId),
       quote: quote.quote,
     },
@@ -129,8 +127,14 @@ export async function setQuote(quote: Quote): Promise<void> {
   )
 }
 
-export async function getQuote(quoteId: string): Promise<Quote> {
-  const quoteDoc = await store.collection('quotes').doc(quoteId).get()
+export async function getQuote(
+  bookId: string,
+  quoteId: string
+): Promise<Quote> {
+  const quoteDoc = await store
+    .collection(getQuotesPath(bookId))
+    .doc(quoteId)
+    .get()
   return getQuoteFromDoc(quoteDoc)
 }
 
@@ -144,9 +148,8 @@ export async function getQuotes({
   lastId?: string
 }): Promise<Quote[]> {
   let request = store
-    .collection('quotes')
+    .collection(getQuotesPath(bookId))
     .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
-    .where('bookId', '==', getBookRef(bookId))
     .limit(LIMIT_ITEMS)
 
   if (userId) {
@@ -154,7 +157,7 @@ export async function getQuotes({
   }
 
   if (lastId) {
-    const lastDoc = await store.collection('quotes').doc(lastId).get()
+    const lastDoc = await getDocID(lastId, getQuotesPath(bookId)).get()
     request = request.startAfter(lastDoc)
   }
 
@@ -168,12 +171,15 @@ export async function getQuotes({
   return quotes
 }
 
+function getQuotesPath(bookId: string): string {
+  return `quotes/${bookId}/items`
+}
+
 function getQuoteFromDoc(quoteDoc: firebase.firestore.DocumentSnapshot): Quote {
   const quoteData = quoteDoc.data()
   return {
     id: quoteDoc.id,
     userId: quoteData?.userId.id || '',
-    bookId: quoteData?.bookId.id || '',
     quote: quoteData?.quote || '',
   }
 }

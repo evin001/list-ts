@@ -20,16 +20,15 @@ const QuoteEditPage = () => {
     user: store.user.user,
   }))
 
-  useDidMount(() => dispatch(fetchQuote(quoteId)))
+  useDidMount(() => dispatch(fetchQuote({ bookId, quoteId })))
 
   useWillUnmount(() => dispatch(resetQuote()))
 
   useEffect(() => {
     if (quote) {
       setForm(new QuoteForm(quote))
-    } else if (user && form.bookId !== bookId && form.userId !== user.id) {
+    } else if (user && form.userId !== user.id) {
       const nextForm = form.clone()
-      nextForm.bookId = bookId
       nextForm.userId = user.id
       setForm(nextForm)
     }
@@ -43,7 +42,8 @@ const QuoteEditPage = () => {
 
   const handleCancel = () => dispatch(redirect(quotesRoute(bookId)))
 
-  const handleSave = () => dispatch(setQuote(form.toObject()))
+  const handleSave = () =>
+    dispatch(setQuote({ bookId, quote: form.toObject() }))
 
   if (user && form.userId && form.userId !== user.id) {
     return (

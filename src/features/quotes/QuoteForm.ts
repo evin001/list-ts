@@ -4,13 +4,11 @@ class QuoteForm {
   static QUOTE_MAX_LENGTH = 1000
 
   readonly #id: string
-  #bookId: string
   #userId: string
   #quote: string
 
   constructor(quote?: Quote) {
     this.#id = quote?.id || ''
-    this.#bookId = quote?.bookId || ''
     this.#userId = quote?.userId || ''
     this.#quote = quote?.quote || ''
   }
@@ -22,7 +20,6 @@ class QuoteForm {
   toObject(): Quote {
     return {
       id: this.#id,
-      bookId: this.#bookId,
       userId: this.#userId,
       quote: this.#quote,
     }
@@ -42,14 +39,6 @@ class QuoteForm {
 
   get helpTextQuote() {
     return `${this.#quote.length}/${QuoteForm.QUOTE_MAX_LENGTH}`
-  }
-
-  get bookId() {
-    return this.#bookId
-  }
-
-  set bookId(value) {
-    this.#bookId = value
   }
 
   get userId() {
