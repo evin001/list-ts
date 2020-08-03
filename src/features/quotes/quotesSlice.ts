@@ -101,7 +101,7 @@ export const fetchQuotes = createAsyncThunk(
 
 const initialState: QuotesState = {
   quotes: [],
-  filterByUser: false,
+  filterByUser: true,
 }
 
 const quotesSlice = createSlice({

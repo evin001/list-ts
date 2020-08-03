@@ -488,15 +488,26 @@ export async function searchBooks(
     .limit(10)
     .get()
 
-  return booksDoc.docs.map((bookDoc) => ({
-    id: bookDoc.id,
-    name: bookDoc.data().name,
-    description: bookDoc.data().description,
-    year: bookDoc.data().year,
-    edition: bookDoc.data().edition,
-    numberInSeries: bookDoc.data().numberInSeries,
-    cover: bookDoc.data().cover,
-  }))
+  const books = []
+  for (let i = 0; i < booksDoc.size; i++) {
+    const bookDoc = booksDoc.docs[i]
+    const bookData = booksDoc.docs[i].data()
+
+    const cover = await getCoverUrl(bookData.cover)
+
+    const book: FilteredBook = {
+      id: bookDoc.id,
+      name: bookData.name,
+      description: bookData.description,
+      year: bookData.year,
+      edition: bookData.edition,
+      numberInSeries: bookData.numberInSeries,
+      cover,
+    }
+    books.push(book)
+  }
+
+  return books
 }
 
 function getBookRef(bookId: string) {

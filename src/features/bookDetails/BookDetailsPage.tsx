@@ -197,7 +197,9 @@ const BookDetailsPage = () => {
       details.book.name = value || ''
       const filteredBookIndex = filteredBooks.findIndex((b) => b.name === value)
       if (value && ~filteredBookIndex) {
+        details.book.id = filteredBooks[filteredBookIndex].id
         details.book.description = filteredBooks[filteredBookIndex].description
+        details.book.cover = filteredBooks[filteredBookIndex].cover
       }
     })
   }

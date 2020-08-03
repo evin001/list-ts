@@ -125,14 +125,13 @@ class BookField {
   static TAGS_MAX_COUNT = 10
   static SERIES_MAX_COUNT = 3
 
-  readonly #id: string
-  readonly #cover: string
-
+  #id: string
   #name: string
   #description: string
   #year: string
   #edition: string
   #numberInSeries: string
+  #cover: string
   #authors: Author[]
   #genres: Genre[]
   #tags: Tag[]
@@ -180,8 +179,20 @@ class BookField {
     )
   }
 
+  get id() {
+    return this.#id
+  }
+
+  set id(value) {
+    this.#id = value
+  }
+
   get cover() {
     return this.#cover
+  }
+
+  set cover(value) {
+    this.#cover = value
   }
 
   get name() {

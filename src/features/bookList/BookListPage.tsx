@@ -4,10 +4,9 @@ import CardActionArea from '@material-ui/core/CardActionArea'
 import CardContent from '@material-ui/core/CardContent'
 import CardMedia from '@material-ui/core/CardMedia'
 import Grid from '@material-ui/core/Grid'
-import IconButton from '@material-ui/core/IconButton'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
-import AddIcon from '@material-ui/icons/Add'
+import Alert from '@material-ui/lab/Alert'
 import { useWillUnmount } from 'beautiful-react-hooks'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -41,6 +40,9 @@ const useStyles = makeStyles(
       display: 'flex',
       justifyContent: 'space-between',
       margin: `${theme.spacing(1)}px 0`,
+    },
+    emptyList: {
+      marginTop: 30,
     },
   }),
   { name: 'BookListPage' }
@@ -128,7 +130,13 @@ const BookListPage = () => {
           </Grid>
         ))}
       </Grid>
-      {shortItemList.length > 0 && <MoreButton onClick={handleLoadMore} />}
+      {shortItemList.length > 0 ? (
+        <MoreButton onClick={handleLoadMore} />
+      ) : (
+        <Alert severity="info" className={classes.emptyList}>
+          Список книг пуст
+        </Alert>
+      )}
     </div>
   )
 }
