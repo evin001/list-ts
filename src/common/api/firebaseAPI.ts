@@ -127,6 +127,7 @@ export async function setQuote(bookId: string, quote: Quote): Promise<void> {
   const quoteDoc = getDocID(quote.id, getQuotesPath(bookId))
   await quoteDoc.set(
     {
+      id: quoteDoc.id,
       userId: getUserRef(quote.userId),
       quote: quote.quote,
     },
@@ -156,7 +157,7 @@ export async function getQuotes({
 }): Promise<Quote[]> {
   let request = store
     .collection(getQuotesPath(bookId))
-    .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
+    .orderBy('id', 'desc')
     .limit(LIMIT_ITEMS)
 
   if (userId) {

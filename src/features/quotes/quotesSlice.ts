@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { RootState } from '~/app/rootReducer'
 import {
   getQuotes,
   getQuote,
@@ -14,13 +15,17 @@ import { quotesRoute } from './Routes'
 interface QuotesState {
   quotes: Quote[]
   quote?: Quote
+  filterByUser: boolean
 }
 
 const thunkPrefix = 'quotes'
 
 export const deleteQuote = createAsyncThunk(
   `${thunkPrefix}/deleteQuote`,
-  async (args: { bookId: string; quoteId: string }, { dispatch }) => {
+  async (
+    args: { bookId: string; quoteId: string; userId?: string },
+    { dispatch }
+  ) => {
     try {
       dispatch(loading())
       await deleteQuoteAPI(args.bookId, args.quoteId)
@@ -28,8 +33,8 @@ export const deleteQuote = createAsyncThunk(
       dispatch(
         fetchQuotes({
           bookId: args.bookId,
+          userId: args.userId,
           reset: true,
-          userId: 'qCQYcAdf9Ju40kwK4s6w',
         })
       )
     } catch (e) {
@@ -73,11 +78,20 @@ export const fetchQuotes = createAsyncThunk(
   `${thunkPrefix}/fetchQuotes`,
   async (
     args: { bookId: string; userId?: string; lastId?: string; reset?: boolean },
-    { dispatch }
+    { dispatch, getState }
   ) => {
     try {
       dispatch(loading())
-      const quotes = await getQuotes(args)
+
+      const {
+        quotes: { filterByUser },
+      } = getState() as RootState
+
+      const quotes = await getQuotes({
+        ...args,
+        userId: filterByUser ? args.userId : void 0,
+      })
+
       return { quotes, reset: args.reset }
     } finally {
       dispatch(loaded())
@@ -87,6 +101,7 @@ export const fetchQuotes = createAsyncThunk(
 
 const initialState: QuotesState = {
   quotes: [],
+  filterByUser: false,
 }
 
 const quotesSlice = createSlice({
@@ -98,6 +113,9 @@ const quotesSlice = createSlice({
     },
     resetQuote(state) {
       state.quote = void 0
+    },
+    toggleFilterByUser(state) {
+      state.filterByUser = !state.filterByUser
     },
   },
   extraReducers: (builder) => {
@@ -112,6 +130,10 @@ const quotesSlice = createSlice({
   },
 })
 
-export const { resetQuotes, resetQuote } = quotesSlice.actions
+export const {
+  resetQuotes,
+  resetQuote,
+  toggleFilterByUser,
+} = quotesSlice.actions
 
 export default quotesSlice.reducer

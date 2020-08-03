@@ -2,9 +2,11 @@ import Box from '@material-ui/core/Box'
 import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import IconButton from '@material-ui/core/IconButton'
 import Paper from '@material-ui/core/Paper'
 import { makeStyles, Theme } from '@material-ui/core/styles'
+import Switch from '@material-ui/core/Switch'
 import DeleteIcon from '@material-ui/icons/Delete'
 import EditIcon from '@material-ui/icons/Edit'
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
@@ -21,7 +23,12 @@ import ConfirmDialog from '~/common/components/ConfirmDialog'
 import MoreButton from '~/common/components/MoreButtn'
 import RowContent from '~/common/components/RowContent'
 import { redirect } from '~/features/location/locationSlice'
-import { fetchQuotes, resetQuotes, deleteQuote } from './quotesSlice'
+import {
+  fetchQuotes,
+  resetQuotes,
+  deleteQuote,
+  toggleFilterByUser,
+} from './quotesSlice'
 import { quoteEditRoute, quoteCreateRoute } from './Routes'
 import { getColor } from './utils'
 
@@ -76,9 +83,10 @@ const QuotesPage = ({ onShare }: Props) => {
   const [deleteId, setDeleteId] = useState<string>()
   const { bookId } = useParams()
   const dispatch = useDispatch()
-  const { user, quotes } = useSelector((store: RootState) => ({
+  const { user, quotes, filterByUser } = useSelector((store: RootState) => ({
     user: store.user.user,
     quotes: store.quotes.quotes,
+    filterByUser: store.quotes.filterByUser,
   }))
   const deleteQuoteIndex = quotes.findIndex(
     (item: Quote) => item.id === deleteId
@@ -86,9 +94,9 @@ const QuotesPage = ({ onShare }: Props) => {
 
   useEffect(() => {
     if (user?.id) {
-      dispatch(fetchQuotes({ bookId, userId: user.id }))
+      dispatch(fetchQuotes({ bookId, userId: user.id, reset: true }))
     }
-  }, [user])
+  }, [user, filterByUser])
 
   useWillUnmount(() => dispatch(resetQuotes()))
 
@@ -112,14 +120,24 @@ const QuotesPage = ({ onShare }: Props) => {
 
   const handleDeleteQuote = () => {
     if (deleteId) {
-      dispatch(deleteQuote({ bookId, quoteId: deleteId }))
+      dispatch(deleteQuote({ bookId, quoteId: deleteId, userId: user?.id }))
     }
     handleCloseModal()
+  }
+
+  const handleChangeUserFilter = () => {
+    dispatch(toggleFilterByUser())
   }
 
   return (
     <div>
       <Box className={classes.headerContainer}>
+        <FormControlLabel
+          control={
+            <Switch checked={filterByUser} onChange={handleChangeUserFilter} />
+          }
+          label={filterByUser ? 'Только мои цитаты' : 'Все цитаты'}
+        />
         <AddButton onClick={handleClickCreate} />
       </Box>
       {quotes.map((item: Quote, index: number) => {

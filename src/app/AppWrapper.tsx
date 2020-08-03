@@ -24,7 +24,8 @@ const AppWrapper = ({ classes }: Props) => {
   const dispatch = useDispatch()
 
   useDidMount(() => {
-    dispatch(fetchUser({ email: 'e19a@yandex.ru', password: '123456' }))
+    // dispatch(fetchUser({ email: 'e19a@yandex.ru', password: '123456' }))
+    dispatch(fetchUser({ email: 'evgeniy_p08@mail.ru', password: '123456' }))
   })
 
   return (
