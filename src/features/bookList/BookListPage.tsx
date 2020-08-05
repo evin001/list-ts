@@ -1,11 +1,16 @@
 import Box from '@material-ui/core/Box'
 import Card from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
+import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import CardMedia from '@material-ui/core/CardMedia'
 import Grid from '@material-ui/core/Grid'
+import IconButton from '@material-ui/core/IconButton'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
+import DeleteIcon from '@material-ui/icons/Delete'
+import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
+import ShareIcon from '@material-ui/icons/Share'
 import Alert from '@material-ui/lab/Alert'
 import { useWillUnmount } from 'beautiful-react-hooks'
 import React, { useEffect, useState } from 'react'
@@ -17,6 +22,7 @@ import AddButton from '~/common/components/AddButton'
 import MoreButton from '~/common/components/MoreButtn'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
+import { quotesRoute } from '~/features/quotes/Routes'
 import BookFilters from './BookFilters'
 import { fetchUserBooks, resetShortItemList } from './bookListSlice'
 
@@ -43,6 +49,9 @@ const useStyles = makeStyles(
     },
     emptyList: {
       marginTop: 30,
+    },
+    actions: {
+      justifyContent: 'center',
     },
   }),
   { name: 'BookListPage' }
@@ -91,6 +100,9 @@ const BookListPage = () => {
     setType(nextType)
   }
 
+  const linkToQuotes = (bookId: string) => () =>
+    dispatch(redirect(quotesRoute(bookId)))
+
   return (
     <div>
       <Box className={classes.headerContainer}>
@@ -104,29 +116,40 @@ const BookListPage = () => {
       <Grid container spacing={4}>
         {shortItemList.map((item: ShortItemList) => (
           <Grid item xs={4} key={item.id}>
-            <CardActionArea>
-              <Card className={classes.card} onClick={handleClickBook(item.id)}>
+            <Card className={classes.card}>
+              <CardActionArea onClick={handleClickBook(item.id)}>
                 <CardMedia
                   className={classes.media}
                   image={item.shortBook.cover || coverPlaceholderImage}
                   title={item.shortBook.name}
                 />
-              </Card>
-              <CardContent
-                className={classes.content}
-                onClick={handleClickBook(item.id)}
-              >
-                <Typography variant="body2">
-                  {item.shortBook.name}{' '}
-                  {item.doneDate && `(${humanDate(item.doneDate)})`}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {item.shortBook.authors
-                    .map((item: Author) => item.name)
-                    .join(', ')}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
+                <CardContent
+                  className={classes.content}
+                  onClick={handleClickBook(item.id)}
+                >
+                  <Typography variant="body2">
+                    {item.shortBook.name}{' '}
+                    {item.doneDate && `(${humanDate(item.doneDate)})`}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {item.shortBook.authors
+                      .map((item: Author) => item.name)
+                      .join(', ')}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+              <CardActions className={classes.actions}>
+                <IconButton onClick={linkToQuotes(item.shortBook.id)}>
+                  <FormatQuoteIcon />
+                </IconButton>
+                <IconButton>
+                  <ShareIcon />
+                </IconButton>
+                <IconButton>
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
           </Grid>
         ))}
       </Grid>
