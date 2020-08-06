@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography'
 import Skeleton from '@material-ui/lab/Skeleton'
 import React, { Fragment } from 'react'
 import { ShortBook } from '~/common/api/firebaseAPI'
+import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -18,6 +19,7 @@ const useStyles = makeStyles(
       width: 100,
       height: 150,
       flexShrink: 0,
+      backgroundSize: 'cover',
     },
     content: {
       width: '100%',
@@ -26,13 +28,13 @@ const useStyles = makeStyles(
   { name: 'ShortBookPreview' }
 )
 
-const ShortBookPreview = ({ book }: { book: ShortBook }) => {
+const ShortBookPreview = ({ book }: { book?: ShortBook }) => {
   const classes = useStyles()
   return (
     <Card className={classes.root}>
       {book ? (
         <CardMedia
-          image={book.cover}
+          image={book.cover || coverPlaceholderImage}
           className={classes.media}
           title={book.name}
         />
