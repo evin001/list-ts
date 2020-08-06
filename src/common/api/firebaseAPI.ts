@@ -34,7 +34,7 @@ export interface ShortItemList
 
 export type ShortBook = Omit<
   Book,
-  'genres' | 'tags' | 'series' | 'numberInSeries' | 'edition' | 'description'
+  'genres' | 'tags' | 'series' | 'numberInSeries' | 'edition'
 >
 
 export interface ListItem {
@@ -218,29 +218,44 @@ export async function getUserBooks(
   for (const listDoc of listDocs.docs) {
     const listData = listDoc.data()
     const bookDoc = await listData?.bookId.get()
-    const bookData = bookDoc.data()
     const userDoc = await listData?.userId.get()
-    const coverUrl = await getCoverUrl(bookData.cover)
-    const authors = await fetchCollections<Author>(bookData.authors)
+    const shortBook = await getShortBookByDoc(bookDoc)
 
     const itemList: ShortItemList = {
       userId: userDoc.id,
       id: listDoc.id,
       doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
       type: listData?.type,
-      shortBook: {
-        id: bookDoc.id,
-        name: bookData.name,
-        year: bookData.year,
-        cover: coverUrl,
-        authors,
-      },
+      shortBook,
     }
 
     shortItemList.push(itemList)
   }
 
   return shortItemList
+}
+
+export async function getShortBook(bookId: string): Promise<ShortBook> {
+  const bookDoc = await getDocID(bookId, 'books').get()
+  return getShortBookByDoc(bookDoc)
+}
+
+async function getShortBookByDoc(
+  bookDoc: firebase.firestore.DocumentSnapshot
+): Promise<ShortBook> {
+  const bookData = bookDoc.data()
+
+  const coverUrl = await getCoverUrl(bookData?.cover)
+  const authors = await fetchCollections<Author>(bookData?.authors)
+
+  return {
+    id: bookDoc.id,
+    name: bookData?.name,
+    year: bookData?.year,
+    description: bookData?.description,
+    cover: coverUrl,
+    authors,
+  }
 }
 
 export async function getBookFromList(listId: string): Promise<ListItem> {

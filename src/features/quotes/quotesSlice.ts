@@ -5,7 +5,9 @@ import {
   getQuote,
   setQuote as setQuoteAPI,
   deleteQuote as deleteQuoteAPI,
+  getShortBook,
   Quote,
+  ShortBook,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
 import { redirect } from '~/features/location/locationSlice'
@@ -15,10 +17,23 @@ import { quotesRoute } from './Routes'
 interface QuotesState {
   quotes: Quote[]
   quote?: Quote
+  shortBook?: ShortBook
   filterByUser: boolean
 }
 
 const thunkPrefix = 'quotes'
+
+export const fetchShortBook = createAsyncThunk(
+  `${thunkPrefix}/getShortBook`,
+  async (bookId: string, { dispatch }) => {
+    try {
+      dispatch(loading())
+      return await getShortBook(bookId)
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const deleteQuote = createAsyncThunk(
   `${thunkPrefix}/deleteQuote`,
@@ -110,6 +125,7 @@ const quotesSlice = createSlice({
   reducers: {
     resetQuotes(state) {
       state.quotes = []
+      state.shortBook = void 0
     },
     resetQuote(state) {
       state.quote = void 0
@@ -126,6 +142,10 @@ const quotesSlice = createSlice({
 
     builder.addCase(fetchQuote.fulfilled, (state, action) => {
       state.quote = action.payload
+    })
+
+    builder.addCase(fetchShortBook.fulfilled, (state, action) => {
+      state.shortBook = action.payload
     })
   },
 })

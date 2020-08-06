@@ -27,6 +27,7 @@ import {
   fetchQuotes,
   resetQuotes,
   deleteQuote,
+  fetchShortBook,
   toggleFilterByUser,
 } from './quotesSlice'
 import { quoteEditRoute, quoteCreateRoute } from './Routes'
@@ -83,11 +84,14 @@ const QuotesPage = ({ onShare }: Props) => {
   const [deleteId, setDeleteId] = useState<string>()
   const { bookId } = useParams()
   const dispatch = useDispatch()
-  const { user, quotes, filterByUser } = useSelector((store: RootState) => ({
-    user: store.user.user,
-    quotes: store.quotes.quotes,
-    filterByUser: store.quotes.filterByUser,
-  }))
+  const { user, quotes, shortBook, filterByUser } = useSelector(
+    (store: RootState) => ({
+      user: store.user.user,
+      quotes: store.quotes.quotes,
+      shortBook: store.quotes.shortBook,
+      filterByUser: store.quotes.filterByUser,
+    })
+  )
   const deleteQuoteIndex = quotes.findIndex(
     (item: Quote) => item.id === deleteId
   )
@@ -95,6 +99,7 @@ const QuotesPage = ({ onShare }: Props) => {
   useEffect(() => {
     if (user?.id) {
       dispatch(fetchQuotes({ bookId, userId: user.id, reset: true }))
+      dispatch(fetchShortBook(bookId))
     }
   }, [user, filterByUser])
 
