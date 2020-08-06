@@ -31,6 +31,7 @@ import {
   toggleFilterByUser,
 } from './quotesSlice'
 import { quoteEditRoute, quoteCreateRoute } from './Routes'
+import ShortBookPreview from './ShortBookPreview'
 import { getColor } from './utils'
 
 type Props = {
@@ -145,6 +146,7 @@ const QuotesPage = ({ onShare }: Props) => {
         />
         <AddButton onClick={handleClickCreate} />
       </Box>
+      <ShortBookPreview book={shortBook} />
       {quotes.map((item: Quote, index: number) => {
         const color = getColor(index)
         return (
