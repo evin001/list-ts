@@ -45,10 +45,10 @@ const thunkPrefix = 'bookDetails'
 
 export const fetchBook = createAsyncThunk(
   `${thunkPrefix}/fetchBook`,
-  async (listId: string, { dispatch }) => {
+  async (args: { listId: string; userId: string }, { dispatch }) => {
     try {
       dispatch(loading())
-      return await getBookFromList(listId)
+      return await getBookFromList(args.userId, args.listId)
     } catch (e) {
       dispatch(error('Не удалось загрузить данные'))
     } finally {
@@ -94,11 +94,14 @@ export const findBooks = createAsyncThunk(
 
 export const setBookList = createAsyncThunk(
   `${thunkPrefix}/setBookList`,
-  async (args: { listItem: ListItem; cover: File | null }, { dispatch }) => {
+  async (
+    args: { userId: string; listItem: ListItem; cover: File | null },
+    { dispatch }
+  ) => {
     try {
-      const { listItem, cover } = args
+      const { userId, listItem, cover } = args
       dispatch(loading())
-      await setBookListAPI(listItem, cover)
+      await setBookListAPI(userId, listItem, cover)
       dispatch(success(listItem.id ? 'Книга обновлена' : 'Книга добавлена'))
       dispatch(redirect('/'))
     } catch (e) {

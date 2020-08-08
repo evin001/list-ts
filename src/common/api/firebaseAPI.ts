@@ -43,7 +43,6 @@ export interface ListItem {
   readingTarget: string
   type: ListItemType
   book: Book
-  userId: string
 }
 
 export interface Book {
@@ -192,19 +191,25 @@ function getQuoteFromDoc(quoteDoc: firebase.firestore.DocumentSnapshot): Quote {
   }
 }
 
+function getListPath(userId: string): string {
+  return `lists/${userId}/items`
+}
+
 export async function getUserBooks(
   userId: string,
   lastItemId: string,
   type?: ListItemType
 ): Promise<ShortItemList[]> {
   let request = store
-    .collection('lists')
-    .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
-    .where('userId', '==', getUserRef(userId))
+    .collection(getListPath(userId))
+    .orderBy('id', 'desc')
     .limit(LIMIT_ITEMS)
 
   if (lastItemId) {
-    const lastItemDoc = await store.collection('lists').doc(lastItemId).get()
+    const lastItemDoc = await store
+      .collection(getListPath(userId))
+      .doc(lastItemId)
+      .get()
     request = request.startAfter(lastItemDoc)
   }
 
@@ -218,11 +223,9 @@ export async function getUserBooks(
   for (const listDoc of listDocs.docs) {
     const listData = listDoc.data()
     const bookDoc = await listData?.bookId.get()
-    const userDoc = await listData?.userId.get()
     const shortBook = await getShortBookByDoc(bookDoc)
 
     const itemList: ShortItemList = {
-      userId: userDoc.id,
       id: listDoc.id,
       doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
       type: listData?.type,
@@ -258,8 +261,11 @@ async function getShortBookByDoc(
   }
 }
 
-export async function getBookFromList(listId: string): Promise<ListItem> {
-  const listDoc = await store.collection('lists').doc(listId).get()
+export async function getBookFromList(
+  userId: string,
+  listId: string
+): Promise<ListItem> {
+  const listDoc = await store.collection(getListPath(userId)).doc(listId).get()
   const listData = listDoc.data()
 
   const bookDoc = await listData?.bookId.get()
@@ -270,12 +276,9 @@ export async function getBookFromList(listId: string): Promise<ListItem> {
   const tags = await fetchCollections<Tag>(bookData.tags)
   const series = await fetchCollections<Series>(bookData.series)
 
-  const userDoc = await listData?.userId.get()
-
   const coverUrl = await getCoverUrl(bookData.cover)
 
   return {
-    userId: userDoc.id,
     id: listDoc.id,
     doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
     readingTarget: listData?.readingTarget,
@@ -320,6 +323,7 @@ export async function searchSeries(needle: string): Promise<Series[]> {
 }
 
 export async function setBookList(
+  userId: string,
   listItem: ListItem,
   cover: File | null
 ): Promise<void> {
@@ -385,15 +389,15 @@ export async function setBookList(
   )
 
   batch.set(
-    getDocID(listItem.id, 'lists'),
+    getDocID(listItem.id, getListPath(userId)),
     {
+      id: listItem.id,
       doneDate: listItem.doneDate
         ? firebase.firestore.Timestamp.fromMillis(listItem.doneDate)
         : null,
       readingTarget: listItem.readingTarget,
       type: listItem.type,
       bookId: bookRef,
-      userId: getDocID(listItem.userId, 'users'),
     },
     { merge: true }
   )

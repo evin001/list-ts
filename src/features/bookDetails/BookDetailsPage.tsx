@@ -13,7 +13,6 @@ import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { AsyncThunkAction } from '@reduxjs/toolkit'
-import { useDidMount } from 'beautiful-react-hooks'
 import ruLocale from 'date-fns/locale/ru'
 import debounce from 'lodash/debounce'
 import React, { useState, useEffect, useRef } from 'react'
@@ -124,11 +123,11 @@ const BookDetailsPage = () => {
   const imagePreview = useRef<HTMLImageElement>(null)
   const coverInput = useRef<HTMLInputElement>(null)
 
-  useDidMount(() => {
-    if (id) {
-      dispatch(fetchBook(id))
+  useEffect(() => {
+    if (id && user) {
+      dispatch(fetchBook({ listId: id, userId: user.id }))
     }
-  })
+  }, [user])
 
   useEffect(() => {
     if (listItem) {
@@ -258,7 +257,8 @@ const BookDetailsPage = () => {
     if (user) {
       dispatch(
         setBookList({
-          listItem: { ...details.toObject(), userId: user.id },
+          userId: user.id,
+          listItem: details.toObject(),
           cover,
         })
       )
