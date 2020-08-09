@@ -5,11 +5,13 @@ import Checkbox from '@material-ui/core/Checkbox'
 import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import InputLabel from '@material-ui/core/InputLabel'
+import Link from '@material-ui/core/Link'
 import MenuItem from '@material-ui/core/MenuItem'
 import Paper from '@material-ui/core/Paper'
 import Select from '@material-ui/core/Select'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
+import Alert from '@material-ui/lab/Alert'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { AsyncThunkAction } from '@reduxjs/toolkit'
@@ -90,6 +92,9 @@ const useStyles = makeStyles(
       '& > :first-child': {
         marginRight: theme.spacing(2),
       },
+    },
+    resetBook: {
+      marginTop: theme.spacing(1),
     },
   }),
   { name: 'BookDetailsPage' }
@@ -283,6 +288,12 @@ const BookDetailsPage = () => {
         })
       )
     }
+  }
+
+  const resetBookId = () => {
+    updateDetails((details) => {
+      details.book.id = ''
+    })
   }
 
   return (
@@ -511,6 +522,16 @@ const BookDetailsPage = () => {
           </Select>
         </FormControl>
       </Box>
+      {!id && details.book.id && (
+        <Alert severity="info" className={classes.resetBook}>
+          Вы выбрали существующую книгу, все внесённые изменения будут применены
+          к ней. Если вы хотите добавить новую книгу тыкните{' '}
+          <Link component="button" onClick={resetBookId}>
+            сюда
+          </Link>
+          . Будьте внимательны и не создавайте дубликаты.
+        </Alert>
+      )}
       <EditButtonGroup
         id={id}
         disabled={details.hasError}
