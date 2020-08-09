@@ -36,6 +36,7 @@ import BookDetailsForm, {
   BookDetailsType,
   BookType,
   AutocompleteBookType,
+  BookField,
 } from './BookDetailsForm'
 import {
   fetchBook,
@@ -47,6 +48,7 @@ import {
   selectBookNames,
   setBookList,
   resetListItem,
+  fetchBookById,
 } from './bookDetailsSlice'
 
 const COVER_SIZE_LIMIT = 512 // Kilobytes
@@ -106,6 +108,7 @@ const BookDetailsPage = () => {
     filteredAuthors,
     filteredBooks,
     filteredBookNames,
+    selectedBook,
   } = useSelector(
     (store: RootState) => ({
       user: store.user.user,
@@ -115,6 +118,7 @@ const BookDetailsPage = () => {
       filteredTags: store.bookDetails.filteredTags,
       filteredSeries: store.bookDetails.filteredSeries,
       filteredBooks: store.bookDetails.filteredBooks,
+      selectedBook: store.bookDetails.selectedBook,
       filteredBookNames: selectBookNames(store.bookDetails),
     }),
     shallowEqual
@@ -144,6 +148,14 @@ const BookDetailsPage = () => {
     modifier(nextDetails)
     setDetails(nextDetails)
   }
+
+  useEffect(() => {
+    if (selectedBook) {
+      updateDetails((details) => {
+        details.book = new BookField(selectedBook)
+      })
+    }
+  }, [selectedBook])
 
   const handleChangeBook = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateDetails(
@@ -196,20 +208,24 @@ const BookDetailsPage = () => {
     event: React.ChangeEvent<unknown>,
     value: string | null
   ) => {
-    updateDetails((details) => {
-      details.book.name = value || ''
-      const filteredBookIndex = filteredBooks.findIndex((b) => b.name === value)
-      if (value && ~filteredBookIndex) {
-        details.book.id = filteredBooks[filteredBookIndex].id
-        details.book.description = filteredBooks[filteredBookIndex].description
-        details.book.cover = filteredBooks[filteredBookIndex].cover
+    const filteredBookIndex = filteredBooks.findIndex((b) => b.name === value)
+    if (~filteredBookIndex) {
+      const bookId = filteredBooks[filteredBookIndex].id
+      if (
+        !selectedBook ||
+        (selectedBook?.id !== '' && selectedBook.id !== bookId)
+      ) {
+        dispatch(fetchBookById(bookId))
       }
-    })
+    }
   }
 
   const handleChangeBookNameInput = debounce(
     (event: React.ChangeEvent<unknown>, value: string) => {
-      handleChangeBookName(event, value)
+      updateDetails((details) => {
+        details.book.name = value || ''
+      })
+
       if (value && details.book.authors.length) {
         dispatch(
           findBooks({

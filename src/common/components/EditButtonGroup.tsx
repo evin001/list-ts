@@ -38,7 +38,7 @@ const EditButtonGroup = ({ id, disabled, onCancel, onSave }: Props) => {
         disabled={disabled || loading}
         onClick={onSave}
       >
-        {id ? 'Обновить' : 'Создать'}
+        {id ? 'Обновить' : 'Добавить'}
       </Button>
     </Box>
   )

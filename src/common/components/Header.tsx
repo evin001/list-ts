@@ -8,7 +8,7 @@ const Header = () => (
   <AppBar position="static">
     <Toolbar>
       <MenuItem component={Link} to="/">
-        Книги
+        Списки
       </MenuItem>
     </Toolbar>
   </AppBar>

@@ -12,12 +12,14 @@ import {
   searchTags,
   searchSeries,
   setBookList as setBookListAPI,
+  getBookById as getBookIdAPI,
   ListItem,
   Author,
   Genre,
   Tag,
   Series,
   FilteredBook,
+  Book,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
 import { redirect } from '~/features/location/locationSlice'
@@ -25,6 +27,7 @@ import { success, error } from '~/features/notification/notificationSlice'
 
 interface BookDetailsState {
   listItem?: ListItem
+  selectedBook?: Book
   filteredAuthors: Author[]
   filteredGenres: Genre[]
   filteredTags: Tag[]
@@ -33,7 +36,8 @@ interface BookDetailsState {
 }
 
 const initialState: BookDetailsState = {
-  listItem: undefined,
+  listItem: void 0,
+  selectedBook: void 0,
   filteredAuthors: [],
   filteredGenres: [],
   filteredTags: [],
@@ -42,6 +46,18 @@ const initialState: BookDetailsState = {
 }
 
 const thunkPrefix = 'bookDetails'
+
+export const fetchBookById = createAsyncThunk(
+  `${thunkPrefix}/fetchBookById`,
+  async (bookId: string, { dispatch }) => {
+    try {
+      dispatch(loading())
+      return await getBookIdAPI(bookId)
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const fetchBook = createAsyncThunk(
   `${thunkPrefix}/fetchBook`,
@@ -118,6 +134,7 @@ const bookDetailsSlice = createSlice({
   reducers: {
     resetListItem(state) {
       state.listItem = void 0
+      state.selectedBook = void 0
       state.filteredAuthors = []
       state.filteredGenres = []
       state.filteredTags = []
@@ -147,6 +164,7 @@ const bookDetailsSlice = createSlice({
     setField(findTags.fulfilled, 'filteredTags')
     setField(findSeries.fulfilled, 'filteredSeries')
     setField(findBooks.fulfilled, 'filteredBooks')
+    setField(fetchBookById.fulfilled, 'selectedBook')
 
     errorStub(setBookList.rejected)
 

@@ -78,7 +78,10 @@ export interface Series extends ID {
 
 export type ID = { id: string }
 
-export type FilteredBook = Omit<Book, 'authors' | 'genres' | 'tags' | 'series'>
+export interface FilteredBook {
+  id: string
+  name: string
+}
 
 export enum ListItemType {
   Done = 'done',
@@ -202,7 +205,7 @@ export async function getUserBooks(
 ): Promise<ShortItemList[]> {
   let request = store
     .collection(getListPath(userId))
-    .orderBy('id', 'desc')
+    .orderBy('id', 'asc')
     .limit(LIMIT_ITEMS)
 
   if (lastItemId) {
@@ -267,35 +270,46 @@ export async function getBookFromList(
 ): Promise<ListItem> {
   const listDoc = await store.collection(getListPath(userId)).doc(listId).get()
   const listData = listDoc.data()
-
-  const bookDoc = await listData?.bookId.get()
-  const bookData = bookDoc.data()
-
-  const authors = await fetchCollections<Author>(bookData.authors)
-  const genres = await fetchCollections<Genre>(bookData.genres)
-  const tags = await fetchCollections<Tag>(bookData.tags)
-  const series = await fetchCollections<Series>(bookData.series)
-
-  const coverUrl = await getCoverUrl(bookData.cover)
+  const book = await getBookByRef(listData?.bookId)
 
   return {
     id: listDoc.id,
     doneDate: (listData?.doneDate as firebase.firestore.Timestamp)?.toMillis(),
     readingTarget: listData?.readingTarget,
     type: listData?.type,
-    book: {
-      id: bookDoc.id,
-      name: bookData.name,
-      description: bookData.description,
-      year: bookData.year,
-      edition: bookData.edition,
-      numberInSeries: bookData.numberInSeries,
-      authors,
-      genres,
-      tags,
-      series,
-      cover: coverUrl,
-    },
+    book,
+  }
+}
+
+export async function getBookById(bookId: string): Promise<Book> {
+  return getBookByRef(getDocID(bookId, 'books'))
+}
+
+async function getBookByRef(
+  bookRef: firebase.firestore.DocumentReference
+): Promise<Book> {
+  const bookDoc = await bookRef.get()
+  const bookData = bookDoc.data()
+
+  const authors = await fetchCollections<Author>(bookData?.authors)
+  const genres = await fetchCollections<Genre>(bookData?.genres)
+  const tags = await fetchCollections<Tag>(bookData?.tags)
+  const series = await fetchCollections<Series>(bookData?.series)
+
+  const coverUrl = await getCoverUrl(bookData?.cover)
+
+  return {
+    id: bookDoc.id,
+    name: bookData?.name,
+    description: bookData?.description,
+    year: bookData?.year,
+    edition: bookData?.edition,
+    numberInSeries: bookData?.numberInSeries,
+    authors,
+    genres,
+    tags,
+    series,
+    cover: coverUrl,
   }
 }
 
@@ -511,17 +525,9 @@ export async function searchBooks(
   for (let i = 0; i < booksDoc.size; i++) {
     const bookDoc = booksDoc.docs[i]
     const bookData = booksDoc.docs[i].data()
-
-    const cover = await getCoverUrl(bookData.cover)
-
     const book: FilteredBook = {
       id: bookDoc.id,
       name: bookData.name,
-      description: bookData.description,
-      year: bookData.year,
-      edition: bookData.edition,
-      numberInSeries: bookData.numberInSeries,
-      cover,
     }
     books.push(book)
   }
