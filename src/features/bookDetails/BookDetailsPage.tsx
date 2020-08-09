@@ -13,6 +13,7 @@ import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import { AsyncThunkAction } from '@reduxjs/toolkit'
+import { useWillUnmount } from 'beautiful-react-hooks'
 import ruLocale from 'date-fns/locale/ru'
 import debounce from 'lodash/debounce'
 import React, { useState, useEffect, useRef } from 'react'
@@ -45,6 +46,7 @@ import {
   findBooks,
   selectBookNames,
   setBookList,
+  resetListItem,
 } from './bookDetailsSlice'
 
 const COVER_SIZE_LIMIT = 512 // Kilobytes
@@ -122,6 +124,8 @@ const BookDetailsPage = () => {
   const [cover, setCover] = useState<File | null>(null)
   const imagePreview = useRef<HTMLImageElement>(null)
   const coverInput = useRef<HTMLInputElement>(null)
+
+  useWillUnmount(() => dispatch(resetListItem()))
 
   useEffect(() => {
     if (id && user) {

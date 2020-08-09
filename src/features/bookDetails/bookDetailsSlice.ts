@@ -115,7 +115,16 @@ export const setBookList = createAsyncThunk(
 const bookDetailsSlice = createSlice({
   name: 'bookDetails',
   initialState,
-  reducers: {},
+  reducers: {
+    resetListItem(state) {
+      state.listItem = void 0
+      state.filteredAuthors = []
+      state.filteredGenres = []
+      state.filteredTags = []
+      state.filteredSeries = []
+      state.filteredBooks = []
+    },
+  },
   extraReducers: (builder) => {
     function setField(
       method: ActionCreatorWithPreparedPayload<any, any>,
@@ -152,5 +161,7 @@ export const getFilteredBooks = (state: BookDetailsState) => state.filteredBooks
 export const selectBookNames = createSelector(getFilteredBooks, (books) =>
   books.map((book) => book.name)
 )
+
+export const { resetListItem } = bookDetailsSlice.actions
 
 export default bookDetailsSlice.reducer
