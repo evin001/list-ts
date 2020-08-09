@@ -290,9 +290,9 @@ const BookDetailsPage = () => {
     }
   }
 
-  const resetBookId = () => {
+  const resetBookId = (bookId: string) => () => {
     updateDetails((details) => {
-      details.book.id = ''
+      details.book.id = bookId
     })
   }
 
@@ -522,16 +522,21 @@ const BookDetailsPage = () => {
           </Select>
         </FormControl>
       </Box>
-      {!id && details.book.id && (
+      {!id && selectedBook ? (
         <Alert severity="info" className={classes.resetBook}>
-          Вы выбрали существующую книгу, все внесённые изменения будут применены
-          к ней. Если вы хотите добавить новую книгу тыкните{' '}
-          <Link component="button" onClick={resetBookId}>
+          {details.book.id
+            ? 'Вы выбрали существующую книгу, все внесённые изменения будут применены к ней.' +
+              ' Если вы хотите добавить новую книгу, тыкните '
+            : 'Если вы хотите вернуть существующую книгу, нажмите '}
+          <Link
+            component="button"
+            onClick={resetBookId(details.book.id ? '' : selectedBook.id)}
+          >
             сюда
           </Link>
           . Будьте внимательны и не создавайте дубликаты.
         </Alert>
-      )}
+      ) : null}
       <EditButtonGroup
         id={id}
         disabled={details.hasError}
