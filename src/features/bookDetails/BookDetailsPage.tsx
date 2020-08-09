@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button'
 import Checkbox from '@material-ui/core/Checkbox'
 import FormControl from '@material-ui/core/FormControl'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
+import IconButton from '@material-ui/core/IconButton'
 import InputLabel from '@material-ui/core/InputLabel'
 import Link from '@material-ui/core/Link'
 import MenuItem from '@material-ui/core/MenuItem'
@@ -11,6 +12,7 @@ import Paper from '@material-ui/core/Paper'
 import Select from '@material-ui/core/Select'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
+import HighlightOffIcon from '@material-ui/icons/HighlightOff'
 import Alert from '@material-ui/lab/Alert'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
@@ -95,6 +97,9 @@ const useStyles = makeStyles(
     },
     resetBook: {
       marginTop: theme.spacing(1),
+    },
+    clearCover: {
+      marginLeft: theme.spacing(1),
     },
   }),
   { name: 'BookDetailsPage' }
@@ -296,6 +301,14 @@ const BookDetailsPage = () => {
     })
   }
 
+  const handleClearCover = () => {
+    setCover(null)
+    if (imagePreview.current) {
+      imagePreview.current.src = details.book.cover || coverPlaceholderImage
+    }
+    resetCover()
+  }
+
   return (
     <div>
       <Box>
@@ -475,6 +488,15 @@ const BookDetailsPage = () => {
               Обложка
             </Button>
           </label>
+          {cover && (
+            <IconButton
+              size="small"
+              className={classes.clearCover}
+              onClick={handleClearCover}
+            >
+              <HighlightOffIcon />
+            </IconButton>
+          )}
         </Box>
       </Box>
       {details.type === ListItemType.Done && (
