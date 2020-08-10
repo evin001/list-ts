@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   getUserBooks,
+  deleteBookFromList as deleteBookFromListAPI,
   ShortItemList,
   ListItemType,
 } from '~/common/api/firebaseAPI'
 import { loading, loaded } from '~/features/loader/loaderSlice'
+import { success, error } from '~/features/notification/notificationSlice'
 
 interface BookListState {
   shortItemList: ShortItemList[]
@@ -15,6 +17,32 @@ const initialState: BookListState = {
 }
 
 const thunkPrefix = 'bookList'
+
+export const deleteBookFromList = createAsyncThunk(
+  `${thunkPrefix}/deleteBookFromList`,
+  async (
+    args: { userId: string; listId: string; type?: ListItemType },
+    { dispatch }
+  ) => {
+    try {
+      dispatch(loading())
+      await deleteBookFromListAPI(args.listId, args.userId)
+      await dispatch(
+        fetchUserBooks({
+          userId: args.userId,
+          lastItemId: '',
+          type: args.type,
+          reset: true,
+        })
+      )
+      dispatch(success('Книга удалена из списка'))
+    } catch (e) {
+      dispatch(error('Не удалось удалить книгу из списка'))
+    } finally {
+      dispatch(loaded())
+    }
+  }
+)
 
 export const fetchUserBooks = createAsyncThunk(
   `${thunkPrefix}/fetchUserBooks`,

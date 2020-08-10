@@ -125,6 +125,13 @@ export async function deleteQuote(
   await getDocID(quoteId, getQuotesPath(bookId)).delete()
 }
 
+export async function deleteBookFromList(
+  listId: string,
+  userId: string
+): Promise<void> {
+  await getDocID(listId, getListPath(userId)).delete()
+}
+
 export async function setQuote(bookId: string, quote: Quote): Promise<void> {
   const quoteDoc = getDocID(quote.id, getQuotesPath(bookId))
   await quoteDoc.set(

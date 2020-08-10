@@ -44,14 +44,14 @@ export const deleteQuote = createAsyncThunk(
     try {
       dispatch(loading())
       await deleteQuoteAPI(args.bookId, args.quoteId)
-      dispatch(success('Цитата удалена'))
-      dispatch(
+      await dispatch(
         fetchQuotes({
           bookId: args.bookId,
           userId: args.userId,
           reset: true,
         })
       )
+      dispatch(success('Цитата удалена'))
     } catch (e) {
       dispatch(error('Не удалось удалить цитату'))
     } finally {

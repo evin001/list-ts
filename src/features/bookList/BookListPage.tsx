@@ -13,18 +13,23 @@ import FormatQuoteIcon from '@material-ui/icons/FormatQuote'
 import ShareIcon from '@material-ui/icons/Share'
 import Alert from '@material-ui/lab/Alert'
 import { useWillUnmount } from 'beautiful-react-hooks'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~/app/rootReducer'
 import { ShortItemList, Author, ListItemType } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 import AddButton from '~/common/components/AddButton'
+import ConfirmDialog from '~/common/components/ConfirmDialog'
 import MoreButton from '~/common/components/MoreButtn'
 import { humanDate } from '~/common/utils/date'
 import { redirect } from '~/features/location/locationSlice'
 import { quotesRoute } from '~/features/quotes/Routes'
 import BookFilters from './BookFilters'
-import { fetchUserBooks, resetShortItemList } from './bookListSlice'
+import {
+  fetchUserBooks,
+  resetShortItemList,
+  deleteBookFromList,
+} from './bookListSlice'
 
 const useStyles = makeStyles(
   (theme: Theme) => ({
@@ -59,6 +64,7 @@ const useStyles = makeStyles(
 
 const BookListPage = () => {
   const [type, setType] = useState<ListItemType>()
+  const [deleteId, setDeleteId] = useState<string>()
   const classes = useStyles()
   const dispatch = useDispatch()
   const { user, shortItemList, loading } = useSelector((store: RootState) => ({
@@ -66,6 +72,10 @@ const BookListPage = () => {
     shortItemList: store.bookList.shortItemList,
     loading: store.loader.loading,
   }))
+  const deleteListIndex = useMemo(
+    () => shortItemList.findIndex((item) => item.id === deleteId),
+    [deleteId]
+  )
 
   useEffect(fetchBooks, [user])
 
@@ -102,6 +112,15 @@ const BookListPage = () => {
 
   const linkToQuotes = (bookId: string) => () =>
     dispatch(redirect(quotesRoute(bookId)))
+
+  const handleClickDelete = (bookId: string) => () => setDeleteId(bookId)
+
+  const handleConfirmDelete = () => {
+    if (deleteId && user) {
+      dispatch(deleteBookFromList({ listId: deleteId, userId: user?.id, type }))
+    }
+    handleClickDelete('')()
+  }
 
   return (
     <div>
@@ -145,7 +164,7 @@ const BookListPage = () => {
                 <IconButton>
                   <ShareIcon />
                 </IconButton>
-                <IconButton>
+                <IconButton onClick={handleClickDelete(item.id)}>
                   <DeleteIcon />
                 </IconButton>
               </CardActions>
@@ -160,6 +179,17 @@ const BookListPage = () => {
           Список книг пуст
         </Alert>
       )}
+      <ConfirmDialog
+        open={deleteListIndex !== -1}
+        title="Вы действительно хотите удалить книгу?"
+        agreeText="Удалить"
+        onClose={handleClickDelete('')}
+        onConfirm={handleConfirmDelete}
+      >
+        Книга {'"'}
+        {shortItemList[deleteListIndex]?.shortBook.name}
+        {'"'} будет удалена из вашего списка
+      </ConfirmDialog>
     </div>
   )
 }
