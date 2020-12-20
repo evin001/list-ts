@@ -101,7 +101,7 @@ const BookListPage = () => {
   const handleLoadMore = () => fetchBooks({ reset: false })
 
   const handleClickBook = (listId = '') => () => {
-    dispatch(redirect(`/book/${listId}`))
+    dispatch(redirect(`/book/${listId}?type=${type || ''}`))
   }
 
   const handleChangeBookType = (value: ListItemType) => {

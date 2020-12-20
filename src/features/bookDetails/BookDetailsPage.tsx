@@ -22,7 +22,7 @@ import ruLocale from 'date-fns/locale/ru'
 import debounce from 'lodash/debounce'
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import {
   Author,
@@ -109,6 +109,7 @@ const BookDetailsPage = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const { id } = useParams()
+  const { search } = useLocation()
   const {
     user,
     listItem,
@@ -152,6 +153,19 @@ const BookDetailsPage = () => {
       setDetails(new BookDetailsForm(listItem))
     }
   }, [listItem])
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(search)
+    if (
+      !id &&
+      listItemTypes.filter((item) => item.value === searchParams.get('type'))
+        .length
+    ) {
+      updateDetails(
+        (details) => (details.type = searchParams.get('type') as ListItemType)
+      )
+    }
+  }, [search])
 
   const updateDetails = (modifier: (details: BookDetailsForm) => void) => {
     const nextDetails = details.clone()
