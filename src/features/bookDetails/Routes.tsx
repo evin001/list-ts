@@ -1,6 +1,7 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 import BookDetailsPage from './BookDetailsPage'
+import BookPreviewPage from './BookPreviewPage'
 
 export default [
   <Route
@@ -14,5 +15,11 @@ export default [
     exact
     path="/book/:id"
     component={BookDetailsPage}
+  />,
+  <Route
+    key="bookPreview"
+    exact
+    path="/book/preview/:id"
+    component={BookPreviewPage}
   />,
 ]

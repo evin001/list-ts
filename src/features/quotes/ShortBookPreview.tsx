@@ -1,10 +1,12 @@
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import CardMedia from '@material-ui/core/CardMedia'
+import Link from '@material-ui/core/Link'
 import { makeStyles, Theme } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import Skeleton from '@material-ui/lab/Skeleton'
 import React, { Fragment } from 'react'
+import { Link as RLink } from 'react-router-dom'
 import { ShortBook } from '~/common/api/firebaseAPI'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
 
@@ -44,7 +46,13 @@ const ShortBookPreview = ({ book }: { book?: ShortBook }) => {
       <CardContent className={classes.content}>
         {book ? (
           <Typography>
-            {book.name} ({book.year})
+            <Link
+              component={RLink}
+              to={`/book/preview/${book.id}`}
+              color="textPrimary"
+            >
+              {book.name} ({book.year})
+            </Link>
           </Typography>
         ) : (
           <Skeleton animation="wave" height={24} width="60%" />
