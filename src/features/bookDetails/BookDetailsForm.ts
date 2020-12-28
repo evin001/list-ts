@@ -7,6 +7,7 @@ import {
   ListItem,
   ListItemType,
 } from '~/common/api/firebaseAPI'
+import { escapeHtml, unescapeHtml } from '~/common/utils/escapeHtml'
 
 export type BookType = keyof Omit<
   Book,
@@ -208,11 +209,13 @@ export class BookField {
   }
 
   get description() {
-    return this.#description
+    return unescapeHtml(this.#description)
   }
 
   set description(value) {
-    this.#description = value.substr(0, BookField.DESCRIPTION_MAX_LENGTH)
+    this.#description = escapeHtml(
+      value.substr(0, BookField.DESCRIPTION_MAX_LENGTH)
+    )
   }
 
   get helpTextDescription() {

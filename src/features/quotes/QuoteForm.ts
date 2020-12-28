@@ -1,4 +1,5 @@
 import { Quote } from '~/common/api/firebaseAPI'
+import { escapeHtml, unescapeHtml } from '~/common/utils/escapeHtml'
 
 class QuoteForm {
   static QUOTE_MAX_LENGTH = 1000
@@ -30,11 +31,11 @@ class QuoteForm {
   }
 
   get quote() {
-    return this.#quote
+    return unescapeHtml(this.#quote)
   }
 
   set quote(value) {
-    this.#quote = value.substr(0, QuoteForm.QUOTE_MAX_LENGTH)
+    this.#quote = escapeHtml(value.substr(0, QuoteForm.QUOTE_MAX_LENGTH))
   }
 
   get helpTextQuote() {

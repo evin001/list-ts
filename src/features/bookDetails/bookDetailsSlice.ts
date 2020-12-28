@@ -172,6 +172,10 @@ const bookDetailsSlice = createSlice({
       // TODO Redirect to not found page
       console.log({ action })
     })
+
+    builder.addCase(fetchBookById.rejected, (state, action) => {
+      console.log({ action })
+    })
   },
 })
 

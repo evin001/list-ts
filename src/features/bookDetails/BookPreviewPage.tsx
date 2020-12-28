@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { RootState } from '~/app/rootReducer'
 import coverPlaceholderImage from '~/common/assets/book_cover.svg'
+import RowContent from '~/common/components/RowContent'
 import { fetchBookById } from './bookDetailsSlice'
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -90,7 +91,7 @@ const BookPreviewPage = () => {
         )}
         {book ? (
           <Typography variant="subtitle2" color="textPrimary" gutterBottom>
-            {book.description}
+            <RowContent text={book.description} />
           </Typography>
         ) : (
           <Fragment>
